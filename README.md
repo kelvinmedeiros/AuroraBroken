@@ -2,103 +2,139 @@
 
 ![AuroraBroken](client/sprites/aurorabroken-logo.png)
 
-RPG de ação em português com campanha solo e cooperativo opcional para até quatro jogadores.
+A top-down action RPG with a solo campaign and optional co-op for up to four players. Available in **English and Brazilian Portuguese**: use **Idioma / Language** in the main menu. Your choice is remembered by this browser and can be changed during a campaign without resetting progress. Players in the same room can use different languages.
 
-![Acendendo e usando uma fogueira no jogo](docs/fogueira-gameplay.gif)
+![English main menu and language selector](docs/menu-english.jpg)
 
-*Capturas reais: fogueira apagada e ativação no cenário em camadas. A animação repete a demonstração; a fogueira permanece acesa na campanha.*
+![Lighting a bonfire during gameplay](docs/fogueira-gameplay.gif)
 
-## Rodar
+*Actual gameplay capture. The GIF repeats the demonstration; the bonfire stays lit in the campaign. Older screenshots and the GIF show the Portuguese interface.*
 
-O projeto local fica em `C:\Projects\AuroraBroken`. Na raiz, execute `npm start` e abra http://localhost:3000. O próprio servidor entrega o cliente e o Socket.IO: não é necessário iniciar um segundo servidor. As dependências existentes bastam; numa instalação nova use `npm run install-all`.
+## Run locally
 
-`npm run dev` reinicia o servidor quando arquivos mudam. Recarregue o navegador após editar o cliente. `npm test` executa testes de geometria, combate, progressão, salvamento e integração real das salas.
+Install [Node.js](https://nodejs.org/) and run these commands from the project root:
 
-## Jogar
+```sh
+npm run install-all
+npm start
+```
 
-- WASD ou setas: andar. Espaço: atacar na direção do personagem.
-- Shift: esquivar (breve invulnerabilidade, recarga de 1,2 s).
-- E: fogueira, portal, inscrição ou runa próxima. R: renascer após cair.
-- I: armas e armaduras. Q: técnica da arma (30 energia, recarga 4 s). F: projétil perfurante (40 energia, recarga 3 s).
-- J: diário e bestiário. M: mapa com objetivos. Esc: menu. F3: colisões.
-- Em telas de toque, botões de movimento e ação aparecem automaticamente.
+Open [localhost:3000](http://localhost:3000). The same server serves the game and Socket.IO; no separate client server is required. With dependencies already installed, just run `npm start`.
 
-O Guerreiro tem ataques curtos e rápidos; a Feiticeira alcança mais longe. Ataques não atravessam paredes. Os círculos inimigos avisam onde o dano acontecerá. Malênio entra em fúria abaixo de metade da vida.
+`npm run dev` restarts the server when files change. Reload the browser after editing client code. `npm test` runs the automated tests.
 
-Derrote os três guardiões do Jardim das Cinzas para abrir seu portal norte. A Cidadela do Sol Partido tem um portal de retorno ao sul. Derrote Malênio e entre no castelo pelo portal junto à fachada. A terceira fase, **Cripta da Primeira Aurora**, contém sete inimigos, incluindo Espectros e o chefe Custódio. Leia a inscrição com E e ative as três runas na ordem indicada para abrir a câmara norte. Derrote o Custódio para concluir a história. Os mortos não reaparecem ao trocar de mapa; renascer restaura apenas os inimigos sobreviventes do mapa quando nenhum outro jogador vivo está nele.
+## Controls and progression
 
-## Armas e armaduras
+- **WASD / Arrow keys:** move. **Space:** attack in the direction you face.
+- **Shift:** dodge with brief invulnerability; 1.2-second cooldown.
+- **E:** interact with nearby bonfires, portals, inscriptions and runes.
+- **R:** respawn after falling. **I:** weapons and armor.
+- **Q:** weapon technique; 30 energy, 4-second cooldown.
+- **F:** piercing energy projectile; 40 energy, 3-second cooldown.
+- **J:** journal and bestiary. **M:** objective map. **Esc:** main menu. **F3:** collision overlay.
+- Movement and action buttons appear automatically on touch devices.
 
-O Guerreiro escolhe espada, lança ou machado. A Feiticeira escolhe cajado, varinha ou grimório. Cada arma tem dano, alcance, direção e intervalo próprios: a lança oferece estocadas longas, o machado troca velocidade por impacto, a varinha concentra ataques rápidos e o grimório atinge ao redor. Q acompanha a arma: redemoinho, estocada, ruptura sísmica, nova arcana, raio concentrado ou círculo solar. Técnicas causam o dobro do dano e desaceleram inimigos por dois segundos. F lança energia que atravessa vários inimigos, mas para em paredes e no selo fechado.
+Attacks cannot pass through solid obstacles. Enemy circles warn you where damage will land. Malênio and the Warden become enraged below half health.
 
-Equipe separadamente **elmo/capuz, peitoral/manto, luvas, grevas/perneiras e botas**, além da arma. Guerreiro: Vigia, Ferro Solar e Guardião da Aurora. Feiticeira: Aprendiz, Tecelã do Eclipse e Oráculo da Aurora. Complete o Jardim para liberar o segundo conjunto e vença Malênio para liberar o terceiro. Misture peças em **Equipar · I**; a tela mostra dano, defesa, regeneração e aparência. As cores das peças são aplicadas ao sprite animado, e a arma aparece na mão. A defesa reduz o dano recebido; peças melhores também aumentam poder e, em alguns conjuntos, regeneração de energia. Cada participante tem equipamento próprio, validado pelo servidor e salvo com seu perfil.
+Defeat the three guardians in the **Garden of Ash** to open its northern portal. The **Citadel of the Shattered Sun** has a return portal to the south. Defeat Malênio, then enter the castle through the portal by its facade.
 
-![Tela de armas e armaduras](docs/equipamentos.jpg)
+The third stage, **Crypt of the First Dawn**, contains seven enemies, including Crypt Shades and the Warden boss. Read the inscription with E and activate the three runes in the indicated order to open the northern chamber. Defeat the Warden to complete the story.
 
-## Fogueiras
+Defeated enemies stay defeated when you change maps. Respawning resets surviving enemies on the map where you died only when no other living player is fighting there.
 
-Cada mapa começa com a fogueira apagada. Aproxime-se e pressione **E** para acendê-la uma única vez por campanha. Ela restaura sua vida, torna a área próxima segura e define seu ponto de retorno. Depois, **E** permite descansar, com oito segundos de recarga. O estado aceso é compartilhado pela sala; cada jogador registra seu próprio ponto de retorno ao interagir. Fogueiras e checkpoints persistem em saves, exportações e reinícios. Saves antigos começam com as fogueiras apagadas.
+## Weapons and armor
 
-## Solo e cooperativo
+The Warrior can equip a sword, spear or axe. The Witch can equip a staff, wand or grimoire. Each weapon has its own damage, reach, attack angle and cooldown: spears deliver long thrusts, axes trade speed for impact, wands focus rapid attacks, and grimoires strike around the caster.
 
-Solo é o padrão e não carrega nem conecta o Socket.IO. O progresso é salvo no armazenamento local do navegador a cada dois segundos e ao sair. Cada **Iniciar nova jornada** cria um save separado. Em **Arquivos e saves** você pode selecionar, renomear, carregar, salvar manualmente, exportar JSON e importar uma campanha. Importar sempre cria um novo registro, preservando os anteriores. O save antigo é reconhecido como **Jornada original**. O autosave afeta apenas a campanha ativa.
+Q uses the equipped weapon's technique: Whirlwind, Piercing Thrust, Seismic Rupture, Arcane Nova, Focused Beam or Solar Circle. Techniques deal double damage and slow enemies for two seconds. F launches energy that can pierce several enemies but stops at walls and the closed dungeon seal.
 
-Cooperativo: escolha o mesmo código de sala nos computadores conectados ao servidor. Informe seu nome; para duas abas no mesmo navegador, use nomes diferentes. As batalhas, chefes e progressão são compartilhadas; personagens de mapas diferentes não aparecem juntos. O servidor aceita comandos, nunca posições ou dano enviados pelo cliente. Até quatro participantes por sala.
+Equip **helmet/hood, chestplate/robe, gloves/gauntlets, greaves/leggings and boots** individually, plus your weapon. Each class has three armor sets:
 
-As salas são salvas a cada 5 segundos, ao salvar manualmente, ao sair e no encerramento normal do servidor. Arquivos separados ficam em `saves/multiplayer/CODIGO.json`, com cópia anterior `.json.bak`. O servidor restaura as salas depois de reiniciar. Um identificador aleatório salvo no navegador, por sala e nome, recupera o personagem; use o mesmo navegador e endereço para manter esse perfil. Se a conexão cair, entre novamente pelo menu. O perfil antigo não é apagado.
+- **Warrior:** Sentry, Solar Iron, Dawn Guardian.
+- **Witch:** Apprentice, Eclipse Weaver, Dawn Oracle.
 
-Em **Saves**, qualquer participante pode salvar/exportar a sala. Só o criador, sozinho na sala, pode importar um arquivo multiplayer. Uma cópia permanente anterior à importação fica em `saves/multiplayer/backups/`. Para restaurar em outro servidor ou quando perdeu o perfil do criador, crie uma nova sala e importe o arquivo. Use outro código para uma nova campanha. Os saves não ficam na pasta pública do site. `SAVE_DIR` permite escolher outro diretório do servidor.
+Clear the Garden to unlock the second set and defeat Malênio to unlock the third. Mix pieces in **Equipment · I**. The screen shows damage, defense, energy regeneration and appearance. Armor colors are applied to regions of the animated character sprite, and the weapon appears in the character's hand. Defense reduces incoming damage; better pieces also increase attack power and, for some sets, energy regeneration.
 
-O servidor escuta em `0.0.0.0:3000` para permitir rede local. Neste PC use http://localhost:3000; em outro PC da mesma rede use o endereço da rede local exibido no menu Cooperativo. `localhost` no segundo PC aponta para o segundo PC, não para o servidor. `HOST` e `PORT` permitem escolher interface e porta. O Windows já possui permissão de entrada para este Node.js; não foi necessário desativar firewall ou configurar encaminhamento no roteador. O PC servidor precisa permanecer ligado e executando `npm start`.
+Every co-op player has separate equipment, validated by the server and saved with their profile.
 
-## Cenários em camadas e profundidade
+![Weapons and armor screen](docs/equipamentos.jpg)
 
-Os três mapas usam imagens contendo **somente o chão**: `ground-garden.png`, `ground-ash.png` e `ground-dungeon.png`. Árvores, árvores secas, pedras, galhos, barreiras, santuário e castelo são PNGs transparentes separados. São 62 objetos no Jardim e 59 na Cidadela, com árvores nas bordas, pedras extras e ruínas. A cripta tem 15 objetos e uma parede dividindo as câmaras, com passagem central controlada pelo puzzle.
+## Bonfires
 
-O desenho segue esta ordem: chão, galhos baixos e sombras, depois objetos altos e personagens ordenados pela posição dos pés. Ao passar ao norte de uma árvore, o personagem fica atrás da copa; ao passar ao sul, aparece à frente. A copa não bloqueia movimento: a colisão fica na base do tronco. Inimigos usam a mesma regra visual, no solo e no cooperativo.
+Each map starts with an unlit bonfire. Approach it and press **E** to light it once per campaign. It restores health, makes the nearby area safe and sets your respawn checkpoint. Afterward, E lets you rest with an eight-second cooldown.
 
-`client/scenery.mjs` define tipo, posição, largura, ponto de apoio e base de colisão de cada objeto. Edite `SCENERY` para distribuir objetos e `PROP_TYPES` para ajustar suas dimensões. O editor administrativo mostra os objetos sobre o piso e permite ocultar essa camada para inspecionar o chão. Mudanças nos polígonos não movem as imagens dos objetos.
+The lit state is shared by the room; each player records their own checkpoint by interacting. Bonfires and checkpoints persist through saves, exports and server restarts. Saves from before the bonfire system start with unlit fires; existing fires are preserved when upgrading to the dungeon expansion.
 
-A configuração antiga do cenário é migrada uma vez: as colisões antigas são substituídas pelas bases dos novos objetos, mantendo os ajustes de dificuldade. A cópia anterior fica em `config/world-settings.json.before-layers.bak`. Saves solo e identidades multiplayer do nome antigo são copiados automaticamente para as novas chaves do navegador; campanhas simultâneas são conciliadas pela data de atualização. Os arquivos originais não são apagados.
+## Solo saves
 
-## Painel de administração
+Solo is the default mode and does not load or connect Socket.IO. Progress is saved in browser storage every two seconds and when leaving the page. Each **Start a new journey** creates a separate save.
 
-Abra **http://localhost:3000/admin.html** no PC que executa o servidor, ou use o link no menu. O painel não permite administrar pela rede local.
+In **Files and saves**, select, rename, load, save manually, export JSON or import a campaign. Importing creates a new entry, preserving previous campaigns. Autosave only updates the active campaign. Older saves are migrated automatically; player names and custom save names are preserved when switching languages.
 
-- Escolha um dos mapas e um objeto. Arraste seus vértices, mova o polígono inteiro ou edite as coordenadas exatas. A ferramenta de retângulo cria uma colisão ao arrastar; a de polígono recebe cliques nos cantos e termina em **Concluir polígono**.
-- Use a grade para alinhar posições, o botão de colisões para comparar com a arte, ou duplique/exclua objetos. Para adicionar ou remover vértices, edite as linhas X, Y. **Aplicar vértices** transfere o texto ao desenho.
-- **Desfazer/Refazer** recupera alterações locais. É possível restaurar um mapa, restaurar todos os padrões, exportar/importar JSON e descartar alterações.
-- Ajuste vida, velocidade, dano, alcance, tempo de aviso e intervalo de ataque de cada inimigo. Também há velocidade e multiplicador de dano do jogador, distância de perseguição e presets Tranquilo, Original e Desafiador.
-- **Salvar e aplicar** publica as mudanças: cooperativo recebe imediatamente; solo consulta a configuração a cada cinco segundos. Inimigos mortos continuam mortos e inimigos vivos preservam a proporção de vida durante a alteração.
+## Co-op and networking
 
-O servidor rejeita números fora dos limites, polígonos cruzados ou sem área e colisões sobre entradas, fogueiras, portais ou pontos dos inimigos. Configurações persistem em `config/world-settings.json`, com a versão anterior em `.json.bak`; `SETTINGS_DIR` permite outro diretório. Para recuperar a cópia anterior, importe o arquivo `.bak` pelo painel (renomeie uma cópia para `.json`) e salve. Publicações concorrentes são rejeitadas para evitar sobrescrever outro painel.
+Choose **Co-op**, enter the same room code on all computers, and use different player names. Battles, bosses, bonfires and puzzle progress are shared. Characters on different maps do not appear together. The server accepts input commands, never client-supplied positions or damage. Each room supports up to four participants.
 
-![Editor de colisões e dificuldade](docs/painel-admin.jpg)
+The server listens on `0.0.0.0:3000` for LAN play. Use [localhost:3000](http://localhost:3000) on the host PC. On another PC on the same network, use the LAN address shown in the Co-op menu. `localhost` on the other PC refers to that computer, not the host. `HOST` and `PORT` configure the listening interface and port. The host must stay on with `npm start` running.
 
-## Organização
+For remote play through an HTTP tunnel such as ngrok, share its HTTPS address and use the same room code. WebSocket traffic uses the page's own origin. Stopping the tunnel disables that public address; it does not stop local play. The admin API remains restricted to localhost.
 
-- `client/world.mjs`: mapas, polígonos de colisão, portais, pontos de surgimento e tipos de inimigos. As coordenadas dos objetos e colisões usam diretamente o mundo de 2048 × 2048 unidades. Posição de atores é o centro dos pés; a colisão não depende das dimensões da arte.
-- `client/engine.mjs`: simulação compartilhada pelo navegador solo e pelo servidor cooperativo, em passos de 1/60 s.
-- `client/app.mjs`, `style.css`, `index.html`: desenho, controles, menus e história. `game.js` é o ponto de entrada.
-- `client/save.mjs`: formato versionado e validação do salvamento solo.
-- `api/server.js`: arquivos estáticos, salas, validação de entrada e snapshots a 20 Hz.
-- `client/collisions.json`: arquivo Tiled antigo mantido como referência; as bases ativas são geradas por `scenery.mjs`, com alterações do admin aplicadas por `settings.mjs`.
+### Multiplayer saves
 
-Os sprites animados dos jogadores recebem as cores dos equipamentos por região. Os seis tipos de inimigo usam artes em perspectiva top-down, em `client/sprites/*-topdown.png`. As fogueiras usam `bonfire-unlit.png` e `bonfire-lit.png`, ambos com transparência. Há uma imagem por tipo de inimigo, com movimento leve aplicado no desenho; não são folhas de animação direcional. Os prompts estão em `client/sprites/topdown-prompts.json` e `client/sprites/expansion-prompts.json`.
+Rooms save every five seconds, on manual save, when players leave and during normal server shutdown. Separate files are stored in `saves/multiplayer/ROOM-CODE.json`, with the previous version in `.json.bak`. The server restores rooms after restarting.
 
-Os três pisos ativos têm **1254 × 1254** pixels, sem objetos ou marcas embutidas. As imagens antigas permanecem somente como referência. O mundo lógico continua com 2048 × 2048 unidades. A geometria de colisão é independente da resolução da imagem. Galhos caídos são decorativos; árvores e construções têm arte e colisão independentes. Logo e objetos foram gerados com imagegen; prompts e caminhos estão em `client/sprites/layers-prompts.json` e `client/sprites/expansion-prompts.json`.
+A random browser identifier, scoped to the room and player name, restores the player profile. Use the same browser and site address to keep that identity. If the connection drops, reconnect through the menu. The old profile is preserved.
 
-- `client/settings.mjs`: validação e aplicação compartilhada de colisões e dificuldade.
-- `client/admin.html`, `admin.mjs`, `admin.css`: editor visual.
-- `api/admin.mjs`: acesso local, publicação e persistência das configurações.
-- `docs/`: captura animada da fogueira e imagem do painel.
+Any participant can save or export the room. Only its creator, alone in the room, can import a multiplayer file. A permanent pre-import backup is saved under `saves/multiplayer/backups/`. To restore on another server or after losing the creator's browser identity, create a new room and import the file. Use another room code for a separate campaign.
 
-## Verificação
+Saves are outside the public client directory and excluded from Git. Set `SAVE_DIR` to use another server save directory.
 
-`npm test` cobre alcance e direção de ataques, esquiva, colisões e caminhos, portais, chefes, salas reais Socket.IO, saves separados, reinício do servidor, fogueiras persistentes e publicação administrativa com controle de acesso e revisão. Os testes também cobrem profundidade, passagem sob copas, acesso ao castelo, runas, bloqueio do selo, seis armas, energia, defesa por armadura e migração dos saves. O painel, os cenários e o menu de equipamentos foram conferidos no navegador.
+## Layered scenery and depth
 
-## Compatibilidade da expansão
+All three maps use ground-only images: `ground-garden.png`, `ground-ash.png` and `ground-dungeon.png`. Trees, dead trees, rocks, branches, barriers, the shrine and the castle are separate transparent PNGs. The Garden has 62 scenery objects and the Citadel has 59, including perimeter trees, extra rocks and ruined barriers. The crypt has 15 objects and a wall separating its chambers, with a central passage controlled by the puzzle.
 
-Configurações de duas fases são migradas para três, mantendo colisões personalizadas e dificuldade e acrescentando as novas bases. O backup fica em `config/world-settings.json.before-dungeon.bak`. Saves antigos preservam guardiões vencidos e recebem os sete inimigos da cripta; a vitória final passa a exigir Custódio e puzzle concluído. Fogueiras anteriores são preservadas; a da nova fase começa apagada.
+Rendering order is ground, low branches and shadows, then tall objects and actors sorted by their feet's Y position. Walking north of a tree places the character behind its canopy; walking south places the character in front. Only the trunk's base blocks movement. Enemies follow the same visual rules in solo and co-op.
 
-`client/equipment.mjs` define armas, conjuntos por classe e desbloqueios. Puzzle e projéteis são simulados em `engine.mjs`; todos na sala compartilham a sequência de runas e a abertura do selo.
+`client/scenery.mjs` defines each object's type, position, width, ground anchor and collision footprint. Edit `SCENERY` to place objects and `PROP_TYPES` to adjust dimensions. The admin editor shows props over the ground, with a toggle to hide them. Editing collision polygons does not move the artwork.
+
+Active ground textures are **1254 × 1254** pixels. Each logical map is **2048 × 2048** world units; collision geometry is independent of image resolution. Older map artwork is kept only as reference. Fallen branches are decorative.
+
+## Administration
+
+Open [localhost:3000/admin.html](http://localhost:3000/admin.html) on the server PC or follow the main menu link. Administration is not available over LAN or a public tunnel. The editor's interface is currently in Portuguese; the game's language selector covers the player interface.
+
+- Select a map and an obstacle. Drag vertices, move the entire polygon or edit exact coordinates. The rectangle tool creates a shape by dragging; the polygon tool accepts corner clicks and finishes with the finish-polygon button.
+- Use the grid and collision overlay to compare geometry with the art. Duplicate or delete shapes. To add or remove vertices, edit the X/Y lines and apply them.
+- Undo/Redo restores local edits. Reset one map or all defaults, export/import JSON, or discard changes.
+- Adjust each enemy's health, speed, damage, range, windup and attack interval. Global settings include player speed, player damage multiplier and pursuit distance, plus Easy, Original and Challenging presets.
+- Save and apply publishes changes immediately to co-op; solo checks every five seconds. Dead enemies remain dead, and living enemies retain their remaining health percentage.
+
+The server rejects out-of-range values, self-intersecting or zero-area polygons, and obstacles covering entrances, bonfires, portals, runes or enemy spawn points. Settings persist in `config/world-settings.json`, with the previous version in `.json.bak`. `SETTINGS_DIR` selects a different configuration directory. To recover a backup, copy it to a `.json` file, import it in the editor and save. Concurrent edits are rejected to avoid overwriting another admin session.
+
+![Collision and difficulty editor](docs/painel-admin.jpg)
+
+## Project structure
+
+- `client/world.mjs`: maps, portals, enemy types and spawn points. Actor positions represent the center of their feet.
+- `client/scenery.mjs`: prop placement, collision footprints and depth ordering.
+- `client/engine.mjs`: simulation shared by solo and co-op, using 1/60-second steps; includes combat, projectiles and the rune puzzle.
+- `client/equipment.mjs`: weapons, class-specific armor sets, stats and unlocks.
+- `client/app.mjs`, `style.css`, `index.html`: rendering, controls, menus and story. `game.js` is the entry point.
+- `client/i18n.mjs`: English translations, Portuguese fallback, browser language preference and player UI localization. Shared world state stays language-independent.
+- `client/save.mjs`, `save-library.mjs`: versioned solo saves and separate browser campaigns.
+- `api/server.js`, `room-store.mjs`: static hosting, authoritative rooms, input validation, 20 Hz snapshots and persistent multiplayer saves.
+- `client/settings.mjs`: shared collision and difficulty validation.
+- `client/admin.html`, `admin.mjs`, `admin.css`: visual editor.
+- `api/admin.mjs`: localhost access control and settings persistence.
+- `client/collisions.json`: legacy Tiled geometry, kept as reference. Active footprints come from `scenery.mjs` with admin edits applied by `settings.mjs`.
+- `docs/`: gameplay GIF and screenshots.
+
+The six enemy types use generated top-down images in `client/sprites/*-topdown.png`, with subtle motion applied by the renderer rather than directional animation sheets. Bonfires use transparent `bonfire-unlit.png` and `bonfire-lit.png`. Logo, props and floor textures were also generated with imagegen. Prompts are recorded in `client/sprites/topdown-prompts.json`, `layers-prompts.json` and `expansion-prompts.json`.
+
+## Compatibility and verification
+
+Legacy scenery settings migrate once to the layered collision footprints, preserving difficulty and creating `config/world-settings.json.before-layers.bak`. Two-stage settings migrate to three stages, preserving custom collisions and adding new footprints; the backup is `config/world-settings.json.before-dungeon.bak`.
+
+Older solo saves and multiplayer identities are copied to the current browser keys without deleting the originals; concurrent campaigns are reconciled by update time. Old campaigns retain defeated guardians and receive the seven crypt enemies. Final victory now requires the solved puzzle and defeated Warden. Existing bonfires remain lit; the new crypt bonfire starts unlit.
+
+`npm test` covers attack range and direction, dodging, collision geometry and reachability, portals, bosses, real Socket.IO rooms, separate saves, server restarts, bonfires, admin access and revision control, depth ordering, canopy traversal, castle entry, runes, the dungeon seal, all six weapons, energy costs, armor defense, save migration and localization.

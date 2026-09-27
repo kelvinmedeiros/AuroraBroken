@@ -1,3 +1,4 @@
+import {t,setText,locale,readLanguage,setLanguage,bindLanguageUI} from './i18n.mjs';
 import {SLOTS,WEAPONS,ARMOR_SETS,normalizeGear,equipmentStats,unlockTier,equip} from './equipment.mjs';
 import {migrateStorage} from './storage-migration.mjs';
 import {PROP_TYPES,drawProp,depthOrder} from './scenery.mjs';
@@ -11,6 +12,10 @@ const $=id=>document.getElementById(id),canvas=$('gameCanvas'),ctx=canvas.getCon
 let width=innerWidth,height=innerHeight,dpr=1,world=null,id='solo',mode='solo',character='warrior',socket=null;
 let input={},mapOpen=false,debug=false,victorySeen=false,accumulator=0,last=performance.now(),lastSend=0,lastSave=0,lastHud=0,onlineError='',joining=false;
 const assets={};
+const languageStorage=(()=>{try{return localStorage;}catch{return null;}})();
+const applyLanguage=bindLanguageUI(document,languageStorage);applyLanguage();
+$('language').value=readLanguage(languageStorage);
+$('language').onchange=()=>{setLanguage($('language').value,languageStorage);applyLanguage();refreshSaveList();if(world)updateHud();};
 let activeSlot='',activeName='',isRoomHost=false,roomSavedAt='',roomSaveError='';
 function resize(){width=innerWidth;height=innerHeight;dpr=Math.min(devicePixelRatio||1,2);canvas.width=width*dpr;canvas.height=height*dpr;}
 resize();addEventListener('resize',resize);
@@ -20,8 +25,8 @@ function selectedSave(){const entries=library();return entries.find(e=>e.id===$(
 function savedWorld(){const entry=selectedSave();return entry?decodeSave(entry.data):null;}
 function save(){
  if(mode!=='solo'||!world||!activeSlot)return false;
- try{putSave(localStorage,activeSlot,activeName,world,id);$('saveStatus').textContent='Salvo · '+activeName;return true;}
- catch{$('saveStatus').textContent='Falha no armazenamento. Exporte seu save.';return false;}
+ try{putSave(localStorage,activeSlot,activeName,world,id);setText($('saveStatus'),'Salvo · '+activeName);return true;}
+ catch{setText($('saveStatus'),'Falha no armazenamento. Exporte seu save.');return false;}
 }
 function modalOpen(){return ['journal','victory','saves','equipment'].some(x=>$(x).open);}
 function inputAllowed(){return world&&$('menu').hidden&&!modalOpen()&&document.visibilityState==='visible';}
@@ -40,18 +45,18 @@ document.querySelectorAll('[data-character]').forEach(el=>el.onclick=()=>{
 });
 function refreshSaveList(preferred){
  const selected=preferred||$('saveList').value,entries=library();$('saveList').replaceChildren();
- for(const entry of entries){const option=document.createElement('option');option.value=entry.id;option.textContent=entry.name+' · '+new Date(entry.updatedAt).toLocaleString('pt-BR');$('saveList').append(option);}
+ for(const entry of entries){const option=document.createElement('option');option.value=entry.id;option.textContent=entry.name+' · '+new Date(entry.updatedAt).toLocaleString(locale());$('saveList').append(option);}
  if(entries.some(e=>e.id===selected))$('saveList').value=selected;
  $('saveName').value=selectedSave()?.name||'';
  for(const name of ['loadSelected','renameSave','exportSolo'])$(name).disabled=!entries.length;
 }
 function openSaves(){
- clearInput();refreshSaveList();$('saveFeedback').textContent='';
- $('activeSave').textContent=!world?'Nenhuma partida ativa.':mode==='solo'?'Solo atual: '+activeName:'Sala atual: '+$('room').value.toUpperCase();
+ clearInput();refreshSaveList();setText($('saveFeedback'),'');
+ setText($('activeSave'),!world?'Nenhuma partida ativa.':mode==='solo'?'Solo atual: '+activeName:'Sala atual: '+$('room').value.toUpperCase());
  $('saveNow').disabled=!world||(mode==='online'&&!socket?.connected);
  $('exportRoom').disabled=mode!=='online'||!socket?.connected;
  $('importRoom').disabled=mode!=='online'||!socket?.connected||!isRoomHost;
- $('roomSaveInfo').textContent=mode==='online'?'Sala '+$('room').value.toUpperCase()+' · '+(isRoomHost?'você é o criador':'participante')+' · último save: '+(roomSavedAt?new Date(roomSavedAt).toLocaleString('pt-BR'):'aguardando'):'Entre em uma sala para salvar ou exportar sua campanha cooperativa.';
+ setText($('roomSaveInfo'),mode==='online'?'Sala '+$('room').value.toUpperCase()+' · '+(isRoomHost?'você é o criador':'participante')+' · último save: '+(roomSavedAt?new Date(roomSavedAt).toLocaleString(locale()):'aguardando'):'Entre em uma sala para salvar ou exportar sua campanha cooperativa.');
  $('saves').showModal();
 }
 function roomRequest(event,data={}){return new Promise((resolve,reject)=>{
@@ -60,51 +65,51 @@ function roomRequest(event,data={}){return new Promise((resolve,reject)=>{
 });}
 function refreshGear(){
  const p=world?.players[id];if(!p)return;const gear=normalizeGear(p.character,p.equipment),tier=unlockTier(world),stats=equipmentStats(p);
- $('gearClass').textContent=p.character==='witch'?'Feiticeira · vestes arcanas':'Guerreiro · armadura de batalha';$('gearSlots').replaceChildren();
+ setText($('gearClass'),p.character==='witch'?'Feiticeira · vestes arcanas':'Guerreiro · armadura de batalha');$('gearSlots').replaceChildren();
  const names=p.character==='witch'?{helmet:'Capuz',chest:'Manto',gloves:'Luvas',legs:'Perneiras',boots:'Botas'}:{helmet:'Elmo',chest:'Peitoral',gloves:'Manoplas',legs:'Grevas',boots:'Botas'};
  for(const slot of ['weapon',...Object.keys(SLOTS)]){
-  const label=document.createElement('label');label.textContent=slot==='weapon'?'Arma':names[slot];const select=document.createElement('select');select.setAttribute('aria-label',label.textContent);
+  const label=document.createElement('label'),caption=document.createElement('span');setText(caption,slot==='weapon'?'Arma':names[slot]);label.append(caption);const select=document.createElement('select');select.setAttribute('aria-label',caption.textContent);
   const options=slot==='weapon'?Object.entries(WEAPONS).filter(([,w])=>w.class===p.character).map(([value,w])=>({value,text:w.name})):ARMOR_SETS[p.character].map((set,value)=>({value,text:names[slot]+' · '+set.name+(value>tier?' (bloqueado)':''),disabled:value>tier}));
-  for(const item of options){const option=document.createElement('option');option.value=item.value;option.textContent=item.text;option.disabled=!!item.disabled;select.append(option);}select.value=gear[slot];
-  select.onchange=async()=>{try{const value=slot==='weapon'?select.value:Number(select.value);if(mode==='online'){const result=await roomRequest('equip',{slot,value});world.players[id].equipment=result.equipment;}else{equip(world,p,slot,value);save();}$('gearFeedback').textContent='Equipamento atualizado.';refreshGear();}catch(error){$('gearFeedback').textContent=error.message;refreshGear();}};
+  for(const item of options){const option=document.createElement('option');option.value=item.value;setText(option,item.text);option.disabled=!!item.disabled;select.append(option);}select.value=gear[slot];
+  select.onchange=async()=>{try{const value=slot==='weapon'?select.value:Number(select.value);if(mode==='online'){const result=await roomRequest('equip',{slot,value});world.players[id].equipment=result.equipment;}else{equip(world,p,slot,value);save();}setText($('gearFeedback'),'Equipamento atualizado.');refreshGear();}catch(error){setText($('gearFeedback'),error.message);refreshGear();}};
   label.append(select);$('gearSlots').append(label);
  }
- $('gearStats').textContent=`Dano ${Math.round(stats.weapon.damage*stats.power)} · Defesa ${stats.defense}% · Alcance ${stats.weapon.range} · Energia +${stats.regen.toFixed(1)}/s`;
- $('gearUnlocks').textContent=`Q: ${stats.weapon.special}. F: projétil de energia. `+(tier===0?'Derrote os três guardiões para liberar o segundo conjunto.':tier===1?'Derrote Malênio para liberar o último conjunto.':'Todos os conjuntos estão disponíveis.');
+ setText($('gearStats'),`Dano ${Math.round(stats.weapon.damage*stats.power)} · Defesa ${stats.defense}% · Alcance ${stats.weapon.range} · Energia +${stats.regen.toFixed(1)}/s`);
+ setText($('gearUnlocks'),`Q: ${stats.weapon.special}. F: projétil de energia. `+(tier===0?'Derrote os três guardiões para liberar o segundo conjunto.':tier===1?'Derrote Malênio para liberar o último conjunto.':'Todos os conjuntos estão disponíveis.'));
  const preview=$('gearPreview').getContext('2d');preview.clearRect(0,0,180,220);preview.save();preview.translate(90,195);preview.scale(2,2);drawEquipped(preview,{...p,x:0,y:0,direction:'down',facingX:0,facingY:1,moving:false},0);preview.restore();
 }
-function openGear(){if(!world)return;if($('equipment').open){$('equipment').close();canvas.focus();return;}clearInput();$('gearFeedback').textContent='';refreshGear();$('equipment').showModal();}
+function openGear(){if(!world)return;if($('equipment').open){$('equipment').close();canvas.focus();return;}clearInput();setText($('gearFeedback'),'');refreshGear();$('equipment').showModal();}
 $('gearButton').onclick=openGear;$('closeGear').onclick=()=>{$('equipment').close();canvas.focus();};
 function download(text,name){const url=URL.createObjectURL(new Blob([text],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download=name.replace(/[^a-zA-Z0-9À-ÿ_.-]/g,'_')+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);}
-function feedback(action){return async()=>{try{await action();}catch(error){$('saveFeedback').textContent=error.message;}};}
+function feedback(action){return async()=>{try{await action();}catch(error){setText($('saveFeedback'),error.message);}};}
 $('saveButton').onclick=openSaves;$('menuSaves').onclick=openSaves;
 $('closeSaves').onclick=()=>{$('saves').close();if($('menu').hidden)canvas.focus();};
 $('saveList').onchange=()=>{$('saveName').value=selectedSave()?.name||'';};
 $('saveNow').onclick=feedback(async()=>{
- if(mode==='online'){await roomRequest('saveRoom');$('saveFeedback').textContent='Sala salva no disco do servidor.';}
- else{if(!save())throw new Error('Não foi possível salvar neste navegador. Use Exportar solo.');refreshSaveList(activeSlot);$('saveFeedback').textContent='Campanha salva separadamente: '+activeName;}
+ if(mode==='online'){await roomRequest('saveRoom');setText($('saveFeedback'),'Sala salva no disco do servidor.');}
+ else{if(!save())throw new Error('Não foi possível salvar neste navegador. Use Exportar solo.');refreshSaveList(activeSlot);setText($('saveFeedback'),'Campanha salva separadamente: '+activeName);}
 });
 $('loadSelected').onclick=()=>{document.querySelector('input[value=solo]').checked=true;start(true);};
 $('renameSave').onclick=feedback(()=>{
  const entry=selectedSave(),name=$('saveName').value.trim();if(!entry||!name)throw new Error('Informe um nome para o save.');
- const entries=library();entries.find(e=>e.id===entry.id).name=name;localStorage.setItem(LIBRARY_KEY,JSON.stringify(entries));if(activeSlot===entry.id)activeName=name;refreshSaveList(entry.id);$('saveFeedback').textContent='Save renomeado.';
+ const entries=library();entries.find(e=>e.id===entry.id).name=name;localStorage.setItem(LIBRARY_KEY,JSON.stringify(entries));if(activeSlot===entry.id)activeName=name;refreshSaveList(entry.id);setText($('saveFeedback'),'Save renomeado.');
 });
 $('exportSolo').onclick=feedback(()=>{
  const entry=selectedSave();if(!entry)throw new Error('Selecione uma campanha solo.');
  if(entry.id===activeSlot&&mode==='solo'&&world)download(exportSolo({...entry,data:encodeSave(world,id)}),entry.name);
- else download(exportSolo(entry),entry.name);$('saveFeedback').textContent='Arquivo solo exportado.';
+ else download(exportSolo(entry),entry.name);setText($('saveFeedback'),'Arquivo solo exportado.');
 });
-$('exportRoom').onclick=feedback(async()=>{const result=await roomRequest('exportRoom');download(JSON.stringify(result.data,null,2),'multiplayer-'+$('room').value.toUpperCase());$('saveFeedback').textContent='Arquivo multiplayer exportado.';});
+$('exportRoom').onclick=feedback(async()=>{const result=await roomRequest('exportRoom');download(JSON.stringify(result.data,null,2),'multiplayer-'+$('room').value.toUpperCase());setText($('saveFeedback'),'Arquivo multiplayer exportado.');});
 let importKind='solo';
 $('importSolo').onclick=()=>{importKind='solo';$('saveFile').value='';$('saveFile').click();};
 $('importRoom').onclick=()=>{importKind='multiplayer';$('saveFile').value='';$('saveFile').click();};
 $('saveFile').onchange=feedback(async()=>{
  const file=$('saveFile').files[0];if(!file)return;if(file.size>240000)throw new Error('Arquivo grande demais (máximo de 240 KB).');
  const text=await file.text();
- if(importKind==='solo'){const entry=importSolo(localStorage,text);refreshSaveList(entry.id);refreshMode();$('saveFeedback').textContent='Importado como uma campanha separada. Clique em Carregar selecionado.';}
- else{await roomRequest('importRoom',JSON.parse(text));victorySeen=false;$('saveFeedback').textContent='Sala restaurada. O save anterior foi guardado em backup.';}
+ if(importKind==='solo'){const entry=importSolo(localStorage,text);refreshSaveList(entry.id);refreshMode();setText($('saveFeedback'),'Importado como uma campanha separada. Clique em Carregar selecionado.');}
+ else{await roomRequest('importRoom',JSON.parse(text));victorySeen=false;setText($('saveFeedback'),'Sala restaurada. O save anterior foi guardado em backup.');}
 });
-fetch('/api/network').then(r=>{if(!r.ok)throw new Error();return r.json();}).then(info=>{$('lanInfo').textContent='No outro PC da mesma rede, abra: '+info.addresses.join(' ou ')+'. Use o mesmo código de sala.';}).catch(()=>{$('lanInfo').textContent='No outro PC, abra http://IP-DESTE-PC:3000. localhost funciona apenas neste computador.';});
+fetch('/api/network').then(r=>{if(!r.ok)throw new Error();return r.json();}).then(info=>{setText($('lanInfo'),'No outro PC da mesma rede, abra: '+info.addresses.join(' ou ')+'. Use o mesmo código de sala.');}).catch(()=>{setText($('lanInfo'),'No outro PC, abra http://IP-DESTE-PC:3000. localhost funciona apenas neste computador.');});
 let socketScript;
 async function loadSocket(){
  if(window.io)return;
@@ -114,7 +119,7 @@ async function loadSocket(){
  });await socketScript;
 }
 async function start(continueSave=false){
- if(joining)return;joining=true;$('start').disabled=true;$('continue').disabled=true;$('menuError').textContent='';
+ if(joining)return;joining=true;$('start').disabled=true;$('continue').disabled=true;setText($('menuError'),'');
  try{
   const chosen=document.querySelector('input[name=mode]:checked').value;
   if(chosen==='online'&&!$('playerName').value.trim())throw new Error('Informe seu nome de jogador.');
@@ -123,7 +128,7 @@ async function start(continueSave=false){
   if(chosen==='solo'){
    const entry=continueSave?selectedSave():null;
    mode='solo';id='solo';world=entry?decodeSave(entry.data):createWorld();if(!world)world=createWorld();
-   activeSlot=entry?.id||newId();activeName=entry?.name||('Jornada '+new Date().toLocaleString('pt-BR'));
+   activeSlot=entry?.id||newId();activeName=entry?.name||(t('Jornada')+' '+new Date().toLocaleString(locale()));
    refreshSaveList(activeSlot);
    if(!world.players[id])addPlayer(world,id,character);
    victorySeen=world.won;save();refreshSaveList(activeSlot);showGame();
@@ -147,7 +152,7 @@ async function start(continueSave=false){
    connection.on('disconnect',()=>{clearInput();onlineError='Conexão encerrada. Abra o menu para entrar novamente ou jogar solo.';});
    showGame();
   }
- }catch(error){socket?.disconnect();socket=null;if(mode==='online')onlineError='Desconectado';$('menuError').textContent=error.message;}
+ }catch(error){socket?.disconnect();socket=null;if(mode==='online')onlineError='Desconectado';setText($('menuError'),error.message);}
  finally{joining=false;$('start').disabled=false;$('continue').disabled=false;}
 }
 $('start').onclick=()=>start(false);$('continue').onclick=()=>start(true);$('resume').onclick=()=>showGame();$('menuButton').onclick=openMenu;
@@ -155,10 +160,10 @@ $('mapButton').onclick=()=>{mapOpen=!mapOpen;canvas.focus();};
 function journal(){
  if(!world)return;
  if($('journal').open){$('journal').close();canvas.focus();return;}
- clearInput();$('journalQuest').textContent=objective(world);
+ clearInput();setText($('journalQuest'),objective(world));
  const lore={hollow:'Antigos vigias, presos ao último juramento. Aproximam-se e anunciam um golpe curto.',ember:'Alimentou-se da luz roubada. Sua explosão é lenta, mas alcança uma área maior.',seer:'Viu o futuro do rei e perdeu a própria sombra. Marca o chão antes de conjurar uma explosão.',shade:'Almas presas à cripta. Invocam marcas de gelo sob seus pés.',warden:'Protege a primeira brasa na câmara selada. Resolva as runas para enfrentá-lo.',malenio:'O guardião que confundiu amor com prisão. Abaixo de meia vida, entra em fúria: seus golpes ficam mais rápidos e amplos.'};
  $('bestiary').replaceChildren();for(const [type,info] of Object.entries(ENEMY_TYPES)){
-  const block=document.createElement('p');block.className='bestiary-entry';const title=document.createElement('strong');title.textContent=info.name;block.append(title,document.createElement('br'),document.createTextNode(lore[type]));$('bestiary').append(block);
+  const block=document.createElement('p');block.className='bestiary-entry';const title=document.createElement('strong');setText(title,info.name);block.append(title,document.createElement('br'),document.createTextNode(t(lore[type])));$('bestiary').append(block);
  }$('journal').showModal();
 }
 $('journalButton').onclick=journal;document.querySelector('#journal .close').onclick=()=>{$('journal').close();canvas.focus();};
@@ -184,7 +189,7 @@ document.querySelectorAll('[data-key]').forEach(button=>{
  for(const name of ['pointerup','pointercancel','lostpointercapture'])button.addEventListener(name,()=>{input[button.dataset.key]=false;});
 });
 function circle(x,y,r,fill,stroke){ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);if(fill){ctx.fillStyle=fill;ctx.fill();}if(stroke){ctx.strokeStyle=stroke;ctx.stroke();}}
-function label(text,x,y,color='#fff0cf',size=12){ctx.font=`${size}px system-ui`;ctx.textAlign='center';ctx.lineWidth=3;ctx.strokeStyle='#141911';ctx.strokeText(text,x,y);ctx.fillStyle=color;ctx.fillText(text,x,y);}
+function label(text,x,y,color='#fff0cf',size=12,translate=true){if(translate)text=t(text);ctx.font=`${size}px system-ui`;ctx.textAlign='center';ctx.lineWidth=3;ctx.strokeStyle='#141911';ctx.strokeText(text,x,y);ctx.fillStyle=color;ctx.fillText(text,x,y);}
 function drawSprite(image,x,y,direction,moving,time,h=82){
  const fw=image.width/9,fh=image.height/4,row={up:0,left:1,down:2,right:3}[direction]??2,frame=moving?1+Math.floor(time*10)%8:0;
  const w=h*fw/fh;ctx.drawImage(image,frame*fw,row*fh,fw,fh,x-w/2,y-h+10,w,h);
@@ -249,7 +254,7 @@ function render(){
   ctx.save();if(a.hp<=0)ctx.globalAlpha=.35;else if(a.invuln>0&&Math.floor(time*15)%2)ctx.globalAlpha=.6;
   ctx.fillStyle='#111a1266';ctx.beginPath();ctx.ellipse(a.x,a.y+2,18,7,0,0,7);ctx.fill();drawEquipped(ctx,a,time);ctx.restore();
   if(a.id===id){ctx.lineWidth=2;ctx.strokeStyle='#fff5c4aa';ctx.beginPath();ctx.moveTo(a.x+a.facingX*24,a.y+a.facingY*24);ctx.lineTo(a.x+a.facingX*33,a.y+a.facingY*33);ctx.stroke();}
-  else label(a.name||(a.character==='witch'?'Feiticeira aliada':'Guerreiro aliado'),a.x,a.y-78,'#d9f4d4',10);
+  else label(a.name||t(a.character==='witch'?'Feiticeira aliada':'Guerreiro aliado'),a.x,a.y-78,'#d9f4d4',10,false);
  }}))];depthOrder(actors).forEach(a=>a.draw());
  for(const shot of world.projectiles.filter(s=>s.map===p.map)){circle(shot.x,shot.y-12,8,shot.color,'#fff3ce');ctx.strokeStyle=shot.color;ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(shot.x,shot.y-12);ctx.lineTo(shot.x-shot.dx*26,shot.y-12-shot.dy*26);ctx.stroke();}
  for(const effect of world.effects.filter(e=>e.map===p.map)){
@@ -264,16 +269,16 @@ function render(){
 }
 function updateHud(){
  if(!world?.players[id])return;const p=world.players[id],m=MAPS[p.map];
- $('mapName').textContent=m.name;$('healthText').textContent=`Brasa · ${p.hp} / 100`;$('healthFill').style.width=p.hp+'%';$('objective').textContent=objective(world);
- $('network').textContent=mode==='solo'?'Solo':onlineError?'Desconectado':`Sala ${$('room').value.toUpperCase()} · ${Object.keys(world.players).length}/4`;
- $('saveStatus').hidden=mode==='online';$('dashStatus').textContent=p.dashCd>0?p.dashCd.toFixed(1)+'s':'pronta';
- const message=onlineError||roomSaveError||(p.messageTime>0?p.message:'');$('toast').hidden=!message||!$('menu').hidden;$('toast').textContent=message;
+ setText($('mapName'),m.name);setText($('healthText'),`Brasa · ${p.hp} / 100`);$('healthFill').style.width=p.hp+'%';setText($('objective'),objective(world));
+ setText($('network'),mode==='solo'?'Solo':onlineError?'Desconectado':`Sala ${$('room').value.toUpperCase()} · ${Object.keys(world.players).length}/4`);
+ $('saveStatus').hidden=mode==='online';setText($('dashStatus'),p.dashCd>0?p.dashCd.toFixed(1)+'s':'pronta');
+ const message=onlineError||roomSaveError||(p.messageTime>0?p.message:'');$('toast').hidden=!message||!$('menu').hidden;setText($('toast'),message);
  let prompt='';const nearPortal=portalsOf(p.map).find(a=>Math.hypot(p.x-a.x,p.y-a.y)<a.r+RADIUS);if(nearPortal)prompt='E · '+nearPortal.label;
  else if(Math.hypot(p.x-m.camp.x,p.y-m.camp.y)<95)prompt=world.campfires?.[p.map]?'E · Descansar na fogueira':'E · Acender fogueira';
  if(p.map===2){const rune=RUNES.find(r=>Math.hypot(p.x-r.x,p.y-r.y)<85);if(rune)prompt='E · Ativar '+rune.label;if(Math.hypot(p.x-INSCRIPTION.x,p.y-INSCRIPTION.y)<85)prompt='E · Ler inscrição';}
- $('combatStatus').textContent=`Energia ${Math.floor(p.energy??100)} · Q ${p.specialCd>0?p.specialCd.toFixed(1)+'s':'pronto'} · F ${p.rangedCd>0?p.rangedCd.toFixed(1)+'s':'pronto'}`;
- $('interaction').hidden=!prompt||p.hp<=0||!$('menu').hidden;$('interaction').textContent=prompt;
- const boss=world.enemies.find(e=>e.type===(p.map===2?'warden':'malenio'));$('bossName').textContent=boss.name;$('bossHud').hidden=![1,2].includes(p.map)||boss.hp<=0||!!prompt||!$('menu').hidden;
+ setText($('combatStatus'),`Energia ${Math.floor(p.energy??100)} · Q ${p.specialCd>0?p.specialCd.toFixed(1)+'s':'pronto'} · F ${p.rangedCd>0?p.rangedCd.toFixed(1)+'s':'pronto'}`);
+ $('interaction').hidden=!prompt||p.hp<=0||!$('menu').hidden;setText($('interaction'),prompt);
+ const boss=world.enemies.find(e=>e.type===(p.map===2?'warden':'malenio'));setText($('bossName'),boss.name);$('bossHud').hidden=![1,2].includes(p.map)||boss.hp<=0||!!prompt||!$('menu').hidden;
  $('bossFill').style.width=boss.hp/boss.maxHp*100+'%';
  if(p.hp<=0&&$('menu').hidden&&!$('death').open&&!modalOpen())$('death').showModal();
  if(p.hp>0&&$('death').open)$('death').close();
@@ -301,5 +306,5 @@ try{
  for(const preview of document.querySelectorAll('[data-preview]')){
   const img=assets[preview.dataset.preview],c=preview.getContext('2d'),fw=img.width/9,fh=img.height/4;c.imageSmoothingEnabled=false;c.drawImage(img,0,fh*2,fw,fh,0,0,80,80);
  }
- $('start').disabled=false;$('start').textContent='Iniciar nova jornada →';refreshSaveList();refreshMode();requestAnimationFrame(frame);
-}catch(error){$('menuError').textContent='Um recurso do jogo não carregou. Recarregue a página para tentar novamente.';console.error(error);}
+ $('start').disabled=false;setText($('start'),'Iniciar nova jornada →');refreshSaveList();refreshMode();requestAnimationFrame(frame);
+}catch(error){setText($('menuError'),'Um recurso do jogo não carregou. Recarregue a página para tentar novamente.');console.error(error);}

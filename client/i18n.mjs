@@ -1,0 +1,105 @@
+// Portuguese source strings remain the shared simulation's wire format.
+// Localization is local to each browser, including in a multilingual room.
+export const LANGUAGE_KEY='aurorabroken-language';
+export function readLanguage(storage){try{return storage.getItem(LANGUAGE_KEY)==='en'?'en':'pt-BR';}catch{return 'pt-BR';}}
+let language='pt-BR';
+export const locale=()=>language==='en'?'en-US':'pt-BR';
+export const EN={
+ 'Jornada':'Journey','Fogueira':'Bonfire','Portal':'Portal',
+ 'Este perfil já está conectado. Use outro nome para jogar em outra aba.':'This profile is already connected. Use another name to play in another tab.',
+ 'Limite de perfis desta sala atingido. Crie outra sala.':'This room has reached its profile limit. Create another room.',
+ 'Entre em uma sala primeiro.':'Join a room first.','Aguarde um segundo entre salvamentos.':'Wait one second between saves.','Não foi possível salvar no disco do servidor.':'Could not save to the server disk.','Entre na sala de destino primeiro.':'Join the destination room first.','Somente o criador da sala pode restaurar um arquivo.':'Only the room creator can restore a file.','Para restaurar, os outros jogadores precisam sair da sala.':'Other players must leave the room before you can restore a file.',
+ 'AuroraBroken — O Sol Partido':'AuroraBroken — The Shattered Sun',
+ 'Mundo de AuroraBroken. Use WASD ou setas para mover, espaço para atacar, Shift para esquivar e E para interagir.':'AuroraBroken world. Use WASD or arrows to move, Space to attack, Shift to dodge and E to interact.',
+ 'SUA JORNADA':'YOUR JOURNEY','Equipar I':'Equipment I','Diário':'Journal','Diário (J)':'Journal (J)','Mapa':'Map','Mapa (M)':'Map (M)','Abrir menu':'Open menu',
+ 'Espaço':'Space','mover':'move','atacar':'attack','esquivar':'dodge','interagir':'interact','pronta':'ready','pronto':'ready',
+ 'Progresso solo salvo neste navegador':'Solo progress saved in this browser',
+ 'Mover para cima':'Move up','Mover para esquerda':'Move left','Mover para baixo':'Move down','Mover para direita':'Move right','Atacar':'Attack','Esquivar':'Dodge',
+ 'UMA JORNADA ENTRE BRASAS':'A JOURNEY AMONG EMBERS',
+ 'O rei roubou a aurora. Você carrega a última brasa.':'The king stole the dawn. You carry the last ember.',
+ 'Liberte os guardiões do Jardim, atravesse o selo e devolva a luz à Cidadela. Toda queda deixa uma brasa. Toda brasa, um recomeço.':'Free the guardians of the Garden, cross the seal and restore light to the Citadel. Every fall leaves an ember. Every ember, a new beginning.',
+ 'ESCOLHA SEU GUARDIÃO':'CHOOSE YOUR GUARDIAN','Guerreiro':'Warrior','Feiticeira':'Witch','Lâmina • rápido e próximo':'Blade • fast and close','Brasa arcana • maior alcance':'Arcane ember • longer reach',
+ 'COMO VOCÊ QUER JOGAR?':'HOW WILL YOU PLAY?','Sem conexão multiplayer':'No multiplayer connection','Cooperativo':'Co-op','Até 4 na mesma sala':'Up to 4 in one room','Sala':'Room','Seu nome':'Your name',
+ 'Use a mesma sala nos dois PCs. Este nome identifica seu perfil neste navegador.':'Use the same room on both PCs. This name identifies your profile in this browser.',
+ 'Carregando endereços da rede local…':'Loading local network addresses…','Carregando o mundo…':'Loading the world…','Iniciar nova jornada →':'Start a new journey →','Continuar jornada':'Continue journey','Arquivos e saves':'Files and saves','Voltar ao jogo':'Return to game','Painel de administração ↗':'Admin panel ↗',
+ 'WASD para explorar':'WASD to explore','Espaço para lutar':'Space to fight','Shift para esquivar':'Shift to dodge','CAPÍTULO I':'CHAPTER I','Nem toda luz':'Not every light','se apaga.':'fades away.','Jardim das Cinzas / Reino da Aurora':'Garden of Ash / Kingdom of Dawn',
+ 'Fechar diário':'Close journal','FRAGMENTOS DE UM REINO':'FRAGMENTS OF A KINGDOM','O livro das brasas':'The Book of Embers',
+ 'Malênio guardava o Sol da Aurora. Quando a noite levou sua família, ele partiu o astro e prendeu a manhã na Cidadela, prometendo que nada mais mudaria. Sem aurora, as lembranças viraram cinza.':'Malênio once guarded the Sun of Dawn. When the night took his family, he shattered the star and imprisoned the morning in the Citadel, vowing that nothing would ever change again. Without dawn, memories turned to ash.',
+ 'Você é um Portador: alguém capaz de devolver calor às memórias. O Guerreiro carrega a lâmina dos antigos vigias. A Feiticeira aprendeu a ouvir as brasas que ainda cantam.':'You are a Bearer: one who can return warmth to memories. The Warrior carries the blade of the old sentries. The Witch learned to hear the embers that still sing.',
+ 'Seu caminho':'Your path',
+ 'Derrote os três guardiões do Jardim. O portal ao norte leva à Cidadela; o portal ao sul permite voltar. Fogueiras restauram a vida. I abre equipamentos; Q usa a técnica da arma; F lança um projétil. Complete o Jardim para liberar o segundo conjunto de armadura e derrote Malênio para obter o terceiro. Guardiões vencidos permanecem vencidos. No cooperativo, a jornada e os inimigos são compartilhados na sala.':'Defeat the three Garden guardians. The northern portal leads to the Citadel; the southern portal takes you back. Bonfires restore health. I opens equipment; Q uses your weapon technique; F fires a projectile. Clear the Garden to unlock the second armor set and defeat Malênio for the third. Defeated guardians stay defeated. In co-op, the room shares the journey and enemies.',
+ 'Espaço: ataque na direção em que você olha. Saia das áreas marcadas antes do impacto. Shift: esquiva com breve invulnerabilidade. R: renascer após cair. F3: visualizar colisões.':'Space: attack in the direction you face. Leave marked areas before impact. Shift: dodge with brief invulnerability. R: respawn after falling. F3: show collision shapes.',
+ 'A CHAMA AINDA VIVE':'THE FLAME LIVES ON','Das cinzas,':'From the ashes,','outra vez.':'once again.','Os guardiões derrotados não retornam. Reúna suas forças na fogueira.':'Defeated guardians do not return. Gather your strength at the bonfire.','Renascer na fogueira · R':'Respawn at the bonfire · R',
+ 'AURORA RESTAURADA':'DAWN RESTORED','O Sol retorna.':'The Sun returns.',
+ 'O Custódio entrega a primeira brasa. As runas libertam a aurora da cripta e a luz atravessa a Cidadela. O reino finalmente pode seguir em frente.':'The Warden yields the first ember. The runes release dawn from the crypt, and light floods the Citadel. The kingdom can finally move forward.',
+ 'Continuar explorando':'Keep exploring','Fechar saves':'Close saves','SUAS JORNADAS':'YOUR JOURNEYS','Nenhuma partida ativa.':'No active game.','Salvar partida atual':'Save current game','Campanhas solo':'Solo campaigns','Save selecionado':'Selected save','Nome do arquivo':'File name','Nome da jornada':'Journey name','Carregar selecionado':'Load selected','Renomear':'Rename','Exportar solo (.json)':'Export solo (.json)','Importar solo':'Import solo',
+ 'Novas jornadas e arquivos importados criam saves separados. O autosave atualiza somente a campanha em andamento. Exporte o arquivo para levar o progresso a outro PC.':'New journeys and imported files create separate saves. Autosave only updates the active campaign. Export the file to take your progress to another PC.',
+ 'Sala multiplayer':'Multiplayer room','Entre em uma sala para salvar ou exportar sua campanha cooperativa.':'Join a room to save or export your co-op campaign.','Exportar sala (.json)':'Export room (.json)','Restaurar sala de arquivo':'Restore room from file',
+ 'A sala salva automaticamente no servidor a cada 5 segundos e ao sair. Só seu criador, sozinho na sala, pode restaurar um arquivo. Crie outro código de sala para uma campanha separada.':'Rooms save automatically on the server every 5 seconds and when players leave. Only the creator, alone in the room, can restore a file. Use a different room code for a separate campaign.',
+ 'Fechar equipamentos':'Close equipment','ARSENAL DO PORTADOR':'THE BEARER’S ARSENAL','Armas e armaduras':'Weapons and armor','Aparência do equipamento atual':'Current equipment appearance',
+ 'Espaço: ataque básico. Q: técnica da arma (30 energia). F: projétil perfurante (40 energia). A energia se regenera durante a exploração. Peças podem ser combinadas individualmente.':'Space: basic attack. Q: weapon technique (30 energy). F: piercing projectile (40 energy). Energy regenerates as you explore. Armor pieces can be mixed individually.',
+ 'Guerreiro · armadura de batalha':'Warrior · battle armor','Feiticeira · vestes arcanas':'Witch · arcane robes','Arma':'Weapon','Elmo':'Helmet','Capuz':'Hood','Peitoral':'Chestplate','Manto':'Robe','Luvas':'Gloves','Manoplas':'Gauntlets','Grevas':'Greaves','Perneiras':'Leggings','Botas':'Boots',
+ 'Espada dos Vigias':'Sentry Sword','Lança da Alvorada':'Dawn Spear','Machado das Cinzas':'Ash Axe','Cajado de Brasas':'Ember Staff','Varinha do Eclipse':'Eclipse Wand','Grimório do Sol Partido':'Shattered Sun Grimoire',
+ 'Vigia':'Sentry','Ferro Solar':'Solar Iron','Guardião da Aurora':'Dawn Guardian','Aprendiz':'Apprentice','Tecelã do Eclipse':'Eclipse Weaver','Oráculo da Aurora':'Dawn Oracle','bloqueado':'locked',
+ 'Redemoinho':'Whirlwind','Estocada perfurante':'Piercing Thrust','Ruptura sísmica':'Seismic Rupture','Nova arcana':'Arcane Nova','Raio concentrado':'Focused Beam','Círculo solar':'Solar Circle',
+ 'Derrote os três guardiões para liberar o segundo conjunto.':'Defeat the three guardians to unlock the second set.','Derrote Malênio para liberar o último conjunto.':'Defeat Malênio to unlock the final set.','Todos os conjuntos estão disponíveis.':'All sets are available.','Equipamento atualizado.':'Equipment updated.',
+ 'Jardim das Cinzas':'Garden of Ash','Cidadela do Sol Partido':'Citadel of the Shattered Sun','Cripta da Primeira Aurora':'Crypt of the First Dawn','Ir à Cidadela':'Travel to the Citadel','Voltar ao Jardim':'Return to the Garden','Entrar no castelo':'Enter the castle','Sair do castelo':'Leave the castle','Sol':'Sun','Lua':'Moon','Brasa':'Ember',
+ 'Espectro da Cripta':'Crypt Shade','Custódio da Primeira Aurora':'Warden of the First Dawn','Sentinela Oca':'Hollow Sentry','Devorador de Brasas':'Ember Devourer','Vidente do Eclipse':'Eclipse Seer','Malênio, o Rei sem Aurora':'Malênio, the King Without Dawn','MALÊNIO, O REI SEM AURORA':'MALÊNIO, THE KING WITHOUT DAWN',
+ 'Antigos vigias, presos ao último juramento. Aproximam-se e anunciam um golpe curto.':'Ancient sentries bound to their final oath. They approach and telegraph a short strike.',
+ 'Alimentou-se da luz roubada. Sua explosão é lenta, mas alcança uma área maior.':'It fed on stolen light. Its blast is slow but covers a larger area.',
+ 'Viu o futuro do rei e perdeu a própria sombra. Marca o chão antes de conjurar uma explosão.':'She saw the king’s future and lost her shadow. She marks the ground before conjuring a blast.',
+ 'Almas presas à cripta. Invocam marcas de gelo sob seus pés.':'Souls bound to the crypt. They summon frost marks beneath your feet.',
+ 'Protege a primeira brasa na câmara selada. Resolva as runas para enfrentá-lo.':'He guards the first ember in the sealed chamber. Solve the runes to face him.',
+ 'O guardião que confundiu amor com prisão. Abaixo de meia vida, entra em fúria: seus golpes ficam mais rápidos e amplos.':'The guardian who mistook love for imprisonment. Below half health, he enrages: his strikes become faster and wider.',
+ 'A memória da cripta descansa.':'The crypt’s memory rests.','O Custódio cai. A primeira aurora finalmente escapa da cripta.':'The Warden falls. The first dawn finally escapes the crypt.',
+ 'Uma sentinela recorda seu juramento. O primeiro selo enfraquece.':'A sentry remembers its oath. The first seal weakens.','A brasa roubada retorna ao Jardim. O caminho da Cidadela está aberto.':'The stolen ember returns to the Garden. The path to the Citadel is open.',
+ 'A Vidente silencia. Malênio já não pode esconder o Sol Partido.':'The Seer falls silent. Malênio can no longer hide the Shattered Sun.','Malênio cai. A entrada do castelo se abre; a última brasa está na cripta.':'Malênio falls. The castle entrance opens; the last ember lies in the crypt.',
+ 'Encontre os três guardiões do Jardim. E interage com fogueiras e portais.':'Find the three Garden guardians. E interacts with bonfires and portals.',
+ 'A aurora voltou • Jornada concluída':'Dawn has returned • Journey complete','Derrote Malênio na Cidadela':'Defeat Malênio in the Citadel','O selo abriu • Derrote o Custódio na câmara norte':'The seal is open • Defeat the Warden in the northern chamber',
+ 'Sua brasa ainda vive. Pressione R para voltar à fogueira.':'Your ember lives on. Press R to return to the bonfire.','A entrada está selada. Derrote Malênio.':'The entrance is sealed. Defeat Malênio.','O selo exige a queda dos três guardiões do Jardim.':'The seal requires the defeat of all three Garden guardians.',
+ 'Inscrição: primeiro a LUA guarda a noite, depois a BRASA desperta, por fim o SOL renasce.':'Inscription: first the MOON guards the night, then the EMBER awakens, and finally the SUN is reborn.',
+ 'O selo já foi desfeito. A câmara norte está aberta.':'The seal is already broken. The northern chamber is open.','As três runas ressoam. A passagem norte se abriu!':'The three runes resonate. The northern passage has opened!','A ordem foi quebrada. Leia a inscrição junto à entrada.':'The order was broken. Read the inscription by the entrance.',
+ 'Fogueira acesa. Sua brasa ficará guardada aqui.':'Bonfire lit. Your ember will be kept here.','A fogueira está se recompondo. Aguarde alguns segundos.':'The bonfire is recovering. Wait a few seconds.','Brasa restaurada. Os guardiões derrotados continuam em repouso.':'Ember restored. Defeated guardians remain at rest.','A fogueira guardou sua jornada. Tente novamente.':'The bonfire preserved your journey. Try again.','Sua brasa foi preservada. A jornada continua.':'Your ember was preserved. The journey continues.',
+ 'Fogueira acesa':'Lit bonfire','Fogueira apagada':'Unlit bonfire','Selo fechado':'Sealed','E · Inscrição antiga':'E · Ancient inscription','Selo das três runas':'Seal of the Three Runes','Guerreiro aliado':'Allied Warrior','Feiticeira aliada':'Allied Witch','Descansar na fogueira':'Rest at the bonfire','Acender fogueira':'Light the bonfire','Ler inscrição':'Read inscription',
+ 'Você: branco  •  Guardiões: cores  •  Fogueira e portal: dourado  •  M fecha':'You: white  •  Guardians: colors  •  Bonfires and portals: gold  •  M closes',
+ 'Falha no armazenamento. Exporte seu save.':'Storage failed. Export your save.','O servidor não respondeu.':'The server did not respond.','Conecte-se a uma sala primeiro.':'Connect to a room first.','Sala salva no disco do servidor.':'Room saved on the server.','Não foi possível salvar neste navegador. Use Exportar solo.':'Could not save in this browser. Use Export solo.','Informe um nome para o save.':'Enter a save name.','Save renomeado.':'Save renamed.','Selecione uma campanha solo.':'Select a solo campaign.','Arquivo solo exportado.':'Solo file exported.','Arquivo multiplayer exportado.':'Multiplayer file exported.','Arquivo grande demais (máximo de 240 KB).':'File too large (maximum 240 KB).','Importado como uma campanha separada. Clique em Carregar selecionado.':'Imported as a separate campaign. Click Load selected.','Sala restaurada. O save anterior foi guardado em backup.':'Room restored. The previous save was backed up.',
+ 'No outro PC, abra http://IP-DESTE-PC:3000. localhost funciona apenas neste computador.':'On the other PC, open http://SERVER-IP:3000. localhost only works on this computer.',
+ 'Não foi possível carregar o modo online. O modo solo continua disponível.':'Could not load online mode. Solo mode is still available.','Informe seu nome de jogador.':'Enter your player name.','Use de 1 a 20 letras, números ou hífens no código da sala.':'Use 1 to 20 letters, numbers or hyphens for the room code.','O servidor não respondeu. Tente novamente ou jogue solo.':'The server did not respond. Try again or play solo.','Sem conexão com a sala. O modo solo está disponível.':'No connection to the room. Solo mode is available.','Conexão encerrada. Abra o menu para entrar novamente ou jogar solo.':'Connection closed. Open the menu to reconnect or play solo.','Desconectado':'Disconnected','Um recurso do jogo não carregou. Recarregue a página para tentar novamente.':'A game asset failed to load. Reload the page to try again.',
+ 'Você precisa estar vivo para trocar equipamento.':'You must be alive to change equipment.','Arma incompatível com a classe.':'Weapon incompatible with your class.','Peça bloqueada: liberte o Jardim ou derrote Malênio.':'Armor locked: free the Garden or defeat Malênio.','Entre em uma sala.':'Join a room.','Você já entrou em uma sala.':'You already joined a room.','Informe sala, nome e um perfil válido.':'Enter a room, name and valid profile.','Sala cheia (máximo de 4 jogadores).':'Room full (maximum 4 players).',
+ 'Save multiplayer inválido.':'Invalid multiplayer save.','Lista de inimigos incompleta no save.':'Incomplete enemy list in the save.','Perfil inválido no save.':'Invalid save profile.','Sala inválida.':'Invalid room.','O save desta sala está corrompido. Preserve os arquivos e restaure um backup em outra sala.':'This room’s save is corrupted. Preserve the files and restore a backup in another room.','Este arquivo é multiplayer. Entre na sala e use Restaurar sala.':'This is a multiplayer file. Join the room and use Restore room.','Arquivo de save inválido ou versão incompatível.':'Invalid save file or unsupported version.',
+ 'Falha ao gravar o save no servidor. Exporte uma cópia.':'Failed to save on the server. Export a copy.'
+};
+export function setLanguage(value,storage){language=value==='en'?'en':'pt-BR';try{storage?.setItem(LANGUAGE_KEY,language);}catch{}return language;}
+export function t(source){
+ const text=String(source??'');if(language!=='en')return text;
+ const trimmed=text.trim();if(Object.hasOwn(EN,trimmed))return text.replace(trimmed,EN[trimmed]);
+ const patterns=[
+  [/^Liberte o Jardim • (\d)\/3 guardiões$/,(_,n)=>`Free the Garden • ${n}/3 guardians`],
+  [/^Entre no castelo • Resolva as runas \((\d)\/3\)$/,(_,n)=>`Enter the castle • Solve the runes (${n}/3)`],
+  [/^Runa correta • (\d)\/3$/,(_,n)=>`Correct rune • ${n}/3`],
+  [/^Brasa · ([\d.]+) \/ 100$/,(_,n)=>`Ember · ${n} / 100`],
+  [/^Energia (\d+) · Q (.+) · F (.+)$/,(_,n,q,f)=>`Energy ${n} · Q ${t(q)} · F ${t(f)}`],
+  [/^Dano (\d+) · Defesa (\d+)% · Alcance (\d+) · Energia \+([\d.]+)\/s$/,(_,d,a,r,e)=>`Damage ${d} · Defense ${a}% · Range ${r} · Energy +${e}/s`],
+  [/^Q: (.+)\. F: projétil de energia\. (.+)$/,(_,special,hint)=>`Q: ${t(special)}. F: energy projectile. ${t(hint)}`],
+  [/^(Elmo|Capuz|Peitoral|Manto|Luvas|Manoplas|Grevas|Perneiras|Botas) · (.+?)( \(bloqueado\))?$/,(_,slot,set,locked)=>`${t(slot)} · ${t(set)}${locked?' (locked)':''}`],
+  [/^E · Ativar (Sol|Lua|Brasa)$/,(_,rune)=>`E · Activate ${t(rune)}`],
+  [/^E · (.+)$/,(_,action)=>`E · ${t(action)}`],
+  [/^Salvo · (.*)$/,(_,name)=>`Saved · ${name}`],
+  [/^Solo atual: (.*)$/,(_,name)=>`Current solo: ${name}`],
+  [/^Sala atual: (.*)$/,(_,name)=>`Current room: ${name}`],
+  [/^Campanha salva separadamente: (.*)$/,(_,name)=>`Campaign saved separately: ${name}`],
+  [/^Sala (.+) · (\d)\/4$/,(_,name,n)=>`Room ${name} · ${n}/4`],
+  [/^Sala (.+) · (você é o criador|participante) · último save: (.+)$/,(_,name,role,date)=>`Room ${name} · ${role==='participante'?'participant':'you are the host'} · last save: ${date==='aguardando'?'waiting':date}`],
+  [/^No outro PC da mesma rede, abra: (.+)\. Use o mesmo código de sala\.$/,(_,addresses)=>`On another PC on the same network, open: ${addresses.replaceAll(' ou ',' or ')}. Use the same room code.`]
+ ];
+ for(const [pattern,replace] of patterns)if(pattern.test(text))return text.replace(pattern,replace);
+ return text;
+}
+// Capture static text once, preserving controls, listeners, canvas and user values.
+export function bindLanguageUI(document,storage){
+ setLanguage(readLanguage(storage));const records=[],walker=document.createTreeWalker(document.documentElement,4);let node;
+ while((node=walker.nextNode()))if(node.textContent.trim()&&!['SCRIPT','STYLE','OPTION'].includes(node.parentElement?.tagName))records.push([node,node.textContent]);
+ const attrs=[...document.querySelectorAll('[aria-label],[title],[placeholder],img[alt]')].flatMap(el=>['aria-label','title','placeholder','alt'].filter(a=>el.hasAttribute(a)).map(a=>[el,a,el.getAttribute(a)]));
+ return ()=>{document.documentElement.lang=language;for(const [node,source] of records)if(node.isConnected)node.textContent=t(source);for(const [el,a,source] of attrs)el.setAttribute(a,t(source));for(const el of document.querySelectorAll('[data-l10n-source]'))el.textContent=t(el.dataset.l10nSource);};
+}
+export function setText(element,source){element.dataset.l10nSource=String(source??'');element.textContent=t(source);}
