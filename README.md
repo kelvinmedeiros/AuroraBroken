@@ -23,6 +23,29 @@ Open [localhost:3000](http://localhost:3000). The same server serves the game an
 
 `npm run dev` restarts the server when files change. Reload the browser after editing client code. `npm test` runs the automated tests.
 
+## Static solo edition / GitHub Pages
+
+Build a standalone edition with no Socket.IO, API calls or running Node server:
+
+```sh
+npm ci
+npm run build:pages
+```
+
+Upload the **contents of `dist/pages/`** to any static host. The folder contains `index.html`, `game.js`, `style.css`, `.nojekyll` and the required sprites. All asset paths are relative, so project sites such as `/AuroraBroken/` work. The build excludes server files, private saves, admin settings and unused artwork. Three maps, combat, equipment, languages, browser autosaves and solo JSON import/export remain available. Co-op and server administration are unavailable in this edition.
+
+Run `npm run preview:pages` to test at [localhost:4173/AuroraBroken/](http://localhost:4173/AuroraBroken/), using only a static file server. Do not open `index.html` directly with `file://`.
+
+To publish this repository using the included workflow:
+
+1. Open **Settings → Pages → Build and deployment**, and select **GitHub Actions** as the source.
+2. Open **Actions → Deploy solo game to GitHub Pages → Run workflow** and choose `main`.
+3. The deployment job provides the published URL. Run the workflow again whenever you want to publish an update.
+
+The workflow is manual; pushing source changes does not automatically publish them. GitHub Pages availability for private repositories depends on the account plan. This build does not change repository visibility. See [GitHub Pages availability](https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages).
+
+Browser saves belong to their site origin: localhost and GitHub Pages have separate storage. Export your solo campaign on the old address, then import it on the published site to transfer progress.
+
 ## Controls and progression
 
 - **WASD / Arrow keys:** move. **Space:** attack in the direction you face.

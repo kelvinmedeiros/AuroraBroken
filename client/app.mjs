@@ -7,6 +7,7 @@ import {createWorld,addPlayer,tick,objective,STEP} from './engine.mjs';
 import {applySettings,refreshWorldSettings,getSettings} from './settings.mjs';
 import {decodeSave,encodeSave} from './save.mjs';
 import {newId,readLibrary,putSave,exportSolo,importSolo,LIBRARY_KEY} from './save-library.mjs';
+// Replaced at build time; direct server development keeps both modes enabled.
 
 const $=id=>document.getElementById(id),canvas=$('gameCanvas'),ctx=canvas.getContext('2d');
 let width=innerWidth,height=innerHeight,dpr=1,world=null,id='solo',mode='solo',character='warrior',socket=null;
@@ -14,6 +15,7 @@ let input={},mapOpen=false,debug=false,victorySeen=false,accumulator=0,last=perf
 const assets={};
 const languageStorage=(()=>{try{return localStorage;}catch{return null;}})();
 const applyLanguage=bindLanguageUI(document,languageStorage);applyLanguage();
+if(!(typeof __PAGES__==='undefined')){for(const el of document.querySelectorAll('[data-server-only]'))el.hidden=true;document.querySelector('input[value=online]').disabled=true;}
 $('language').value=readLanguage(languageStorage);
 $('language').onchange=()=>{setLanguage($('language').value,languageStorage);applyLanguage();refreshSaveList();if(world)updateHud();};
 let activeSlot='',activeName='',isRoomHost=false,roomSavedAt='',roomSaveError='';
@@ -37,7 +39,7 @@ function showGame(){
  $('touch').hidden=!matchMedia('(pointer:coarse)').matches;clearInput();canvas.focus();last=performance.now();accumulator=0;
 }
 function openMenu(){save();clearInput();$('menu').hidden=false;$('resume').hidden=!world;refreshMode();}
-function refreshMode(){const online=document.querySelector('input[name=mode]:checked').value==='online';$('roomField').hidden=!online;$('continue').hidden=online||!savedWorld();}
+function refreshMode(){const online=(typeof __PAGES__==='undefined')&&document.querySelector('input[name=mode]:checked').value==='online';$('roomField').hidden=!online;$('continue').hidden=online||!savedWorld();}
 document.querySelectorAll('input[name=mode]').forEach(el=>el.addEventListener('change',refreshMode));
 document.querySelectorAll('[data-character]').forEach(el=>el.onclick=()=>{
  character=el.dataset.character;
@@ -109,9 +111,10 @@ $('saveFile').onchange=feedback(async()=>{
  if(importKind==='solo'){const entry=importSolo(localStorage,text);refreshSaveList(entry.id);refreshMode();setText($('saveFeedback'),'Importado como uma campanha separada. Clique em Carregar selecionado.');}
  else{await roomRequest('importRoom',JSON.parse(text));victorySeen=false;setText($('saveFeedback'),'Sala restaurada. O save anterior foi guardado em backup.');}
 });
-fetch('/api/network').then(r=>{if(!r.ok)throw new Error();return r.json();}).then(info=>{setText($('lanInfo'),'No outro PC da mesma rede, abra: '+info.addresses.join(' ou ')+'. Use o mesmo código de sala.');}).catch(()=>{setText($('lanInfo'),'No outro PC, abra http://IP-DESTE-PC:3000. localhost funciona apenas neste computador.');});
+if((typeof __PAGES__==='undefined'))fetch('/api/network').then(r=>{if(!r.ok)throw new Error();return r.json();}).then(info=>{setText($('lanInfo'),'No outro PC da mesma rede, abra: '+info.addresses.join(' ou ')+'. Use o mesmo código de sala.');}).catch(()=>{setText($('lanInfo'),'No outro PC, abra http://IP-DESTE-PC:3000. localhost funciona apenas neste computador.');});
 let socketScript;
 async function loadSocket(){
+ if(!(typeof __PAGES__==='undefined'))return;
  if(window.io)return;
  if(!socketScript)socketScript=new Promise((resolve,reject)=>{
   const script=document.createElement('script');script.src='/socket.io/socket.io.js';
@@ -121,7 +124,7 @@ async function loadSocket(){
 async function start(continueSave=false){
  if(joining)return;joining=true;$('start').disabled=true;$('continue').disabled=true;setText($('menuError'),'');
  try{
-  const chosen=document.querySelector('input[name=mode]:checked').value;
+  const chosen=(typeof __PAGES__==='undefined')?document.querySelector('input[name=mode]:checked').value:'solo';
   if(chosen==='online'&&!$('playerName').value.trim())throw new Error('Informe seu nome de jogador.');
   if(chosen==='online'&&!/^[A-Z0-9-]{1,20}$/.test($('room').value.trim().toUpperCase()))throw new Error('Use de 1 a 20 letras, números ou hífens no código da sala.');
   save();socket?.disconnect();socket=null;onlineError='';clearInput();closeDialogs();
@@ -132,7 +135,7 @@ async function start(continueSave=false){
    refreshSaveList(activeSlot);
    if(!world.players[id])addPlayer(world,id,character);
    victorySeen=world.won;save();refreshSaveList(activeSlot);showGame();
-  }else{
+  }else if((typeof __PAGES__==='undefined')){
    await loadSocket();
    const room=$('room').value.trim().toUpperCase(),name=$('playerName').value.trim();
    migrateStorage(localStorage);
@@ -297,9 +300,9 @@ function frame(now){
  requestAnimationFrame(frame);
 }
 function syncSettings(settings){if(settings.revision===getSettings().revision)return;applySettings(settings);if(world&&mode==='solo'){refreshWorldSettings(world);for(const actor of [...Object.values(world.players),...world.enemies])Object.assign(actor,safePoint(actor.map,actor));}}
-async function fetchSettings(){const r=await fetch('/api/settings',{cache:'no-store'});if(!r.ok)throw new Error('Configuração indisponível');syncSettings(await r.json());}
-$('adminLink').hidden=!['localhost','127.0.0.1','[::1]'].includes(location.hostname);
-setInterval(()=>fetchSettings().catch(console.error),5000);
+async function fetchSettings(){if(!(typeof __PAGES__==='undefined'))return;const r=await fetch('/api/settings',{cache:'no-store'});if(!r.ok)throw new Error('Configuração indisponível');syncSettings(await r.json());}
+$('adminLink').hidden=!(typeof __PAGES__==='undefined')||!['localhost','127.0.0.1','[::1]'].includes(location.hostname);
+if((typeof __PAGES__==='undefined'))setInterval(()=>fetchSettings().catch(console.error),5000);
 try{
  await fetchSettings();
  await Promise.all([...Object.entries(PROP_TYPES).map(([name,type])=>loadImage(name,type.file)),...MAPS.map(m=>loadImage('map'+m.id,m.image)),loadImage('warrior','warrior.png'),loadImage('witch','witch.png'),...Object.keys(ENEMY_TYPES).map(name=>loadImage(name,name+'-topdown.png')),loadImage('fireLit','bonfire-lit.png'),loadImage('fireUnlit','bonfire-unlit.png')]);
