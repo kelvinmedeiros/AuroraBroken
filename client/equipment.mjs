@@ -1,3 +1,4 @@
+import {progressionStats} from './progression.mjs';
 export const SLOTS={helmet:'Elmo / capuz',chest:'Peitoral / manto',gloves:'Luvas',legs:'Calças',boots:'Botas'};
 export const WEAPONS={
  sword:{name:'Espada dos Vigias',class:'warrior',damage:24,range:112,cooldown:.43,arc:.25,color:'#e8d2a1',special:'Redemoinho',style:'sweep'},
@@ -14,10 +15,10 @@ export const ARMOR_SETS={
 export function defaultGear(character){return {weapon:character==='witch'?'staff':'sword',...Object.fromEntries(Object.keys(SLOTS).map(k=>[k,0]))};}
 export function normalizeGear(character,input){const gear=defaultGear(character);if(WEAPONS[input?.weapon]?.class===character)gear.weapon=input.weapon;for(const slot of Object.keys(SLOTS))if(Number.isInteger(input?.[slot])&&input[slot]>=0&&input[slot]<=2)gear[slot]=input[slot];return gear;}
 export function unlockTier(world){if(world.enemies.some(e=>e.type==='malenio'&&e.hp===0))return 2;return world.enemies.filter(e=>e.hp===0).length>=3?1:0;}
-export function equipmentStats(player){const gear=normalizeGear(player.character,player.equipment),sets=ARMOR_SETS[player.character];let defense=0,power=1,regen=18;for(const slot of Object.keys(SLOTS)){const set=sets[gear[slot]];defense+=set.defense;power+=set.power;regen+=set.regen;}return {defense,power,regen,weapon:WEAPONS[gear.weapon]};}
+export function equipmentStats(player){const gear=normalizeGear(player.character,player.equipment),sets=ARMOR_SETS[player.character];let defense=0,power=1,regen=18;for(const slot of Object.keys(SLOTS)){const set=sets[gear[slot]];defense+=set.defense;power+=set.power;regen+=set.regen;}const bonus=progressionStats(player);return {defense:Math.min(70,defense+bonus.defense+(bonus.ward?10:0)),power:power*bonus.power*(bonus.solar?1.15:1),regen:regen+Math.min(40,(player.attributes?.vigor||0)*.4),weapon:WEAPONS[gear.weapon]};}
 export function equip(world,player,slot,value){
  if(!player||player.hp<=0)throw new Error('Você precisa estar vivo para trocar equipamento.');
  if(slot==='weapon'){if(WEAPONS[value]?.class!==player.character)throw new Error('Arma incompatível com a classe.');}
  else if(!(slot in SLOTS)||!Number.isInteger(value)||value<0||value>unlockTier(world))throw new Error('Peça bloqueada: liberte o Jardim ou derrote Malênio.');
- player.equipment=normalizeGear(player.character,player.equipment);player.equipment[slot]=value;return player.equipment;
+ player.equipment=normalizeGear(player.character,player.equipment);if(slot==='weapon'&&player.lootGear)delete player.lootGear.weapon;player.equipment[slot]=value;return player.equipment;
 }

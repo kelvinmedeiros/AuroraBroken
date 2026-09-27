@@ -14,7 +14,7 @@ app.get('/api/network',(_,res)=>{
  res.json({addresses});
 });
 async function main(){
- const {tick,STEP}=await import('../client/engine.mjs');
+ const {tick,STEP,playerAction}=await import('../client/engine.mjs');
  const {RoomStore,newRoom,joinProfile,hashToken,captureRoom,restoreRoom,playerRecord}=await import('./room-store.mjs');
  const store=new RoomStore(process.env.SAVE_DIR||path.join(__dirname,'../saves/multiplayer'));
  const rooms=new Map();
@@ -59,12 +59,16 @@ async function main(){
   socket.on('input',data=>{
    const room=rooms.get(socket.data.room);if(!room||!data||typeof data!=='object')return;
    const now=performance.now();
-   if(now-(room.lastInput[socket.id]||0)<12)return;
+   // Keep the newest intent; the fixed simulation tick bounds action frequency.
    room.inputs[socket.id]=Object.fromEntries(allowed.map(k=>[k,data[k]===true]));room.lastInput[socket.id]=now;
   });
   socket.on('equip',(data,ack)=>{
    if(typeof ack!=='function')return;const room=rooms.get(socket.data.room),player=room?.world.players[socket.id];
    try{if(!player)throw new Error('Entre em uma sala.');const equipment=equip(room.world,player,data?.slot,data?.value);ack({equipment});io.to(socket.data.room).emit('state',room.world);}catch(error){ack({error:error.message});}
+  });
+  socket.on('progression',(data,ack)=>{
+   if(typeof ack!=='function')return;const room=rooms.get(socket.data.room),player=room?.world.players[socket.id];
+   try{if(!player)throw new Error('Entre em uma sala.');playerAction(room.world,player,data?.action,data?.value);persist(socket.data.room,room);ack({world:room.world});io.to(socket.data.room).emit('state',room.world);}catch(error){ack({error:error.message});}
   });
   socket.on('saveRoom',(_,ack)=>{
    if(typeof ack!=='function')return;

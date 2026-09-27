@@ -11,7 +11,7 @@ const require=createRequire(import.meta.url);
 const {io}=require('../client/node_modules/socket.io-client');
 const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 function nextState(socket,predicate=()=>true){return new Promise((resolve,reject)=>{
- const timer=setTimeout(()=>{socket.off('state',listener);reject(new Error('State timeout'));},3000);
+ const timer=setTimeout(()=>{socket.off('state',listener);reject(new Error('State timeout: '+predicate.toString()));},3000);
  const listener=state=>{if(predicate(state)){clearTimeout(timer);socket.off('state',listener);resolve(state);}};
  socket.on('state',listener);
 });}
@@ -34,6 +34,9 @@ test('real server: room isolation, shared state, validated inputs, stale input, 
  assert.equal(shared.players[b.s.id].character,'witch');
  const isolated=await nextState(other.s);assert.equal(Object.keys(isolated.players).length,1);
  assert.deepEqual((await nextState(b.s)).enemies,shared.enemies);
+ const progressRequest=(socket,action,value)=>new Promise(resolve=>socket.emit('progression',{action,value},resolve));
+ assert.match((await progressRequest(a.s,'level','vitality')).error,/fogueira/);
+ assert.match((await progressRequest(a.s,'equipItem','fake-item')).error,/inválido/);
  const equipRequest=(socket,slot,value)=>new Promise(resolve=>socket.emit('equip',{slot,value},resolve));
  assert.equal((await equipRequest(a.s,'weapon','spear')).equipment.weapon,'spear');
  assert.match((await equipRequest(a.s,'weapon','tome')).error,/incompatível/);
@@ -44,7 +47,7 @@ test('real server: room isolation, shared state, validated inputs, stale input, 
  a.s.emit('input',{x:999999,y:NaN,hp:9999,map:1,right:'true'});
  await wait(70);let state=await nextState(a.s);assert.equal(state.players[a.s.id].map,0);assert.equal(state.players[a.s.id].hp,100);assert.equal(state.players[a.s.id].x,1040);
  a.s.emit('input',{right:true});state=await nextState(b.s,w=>w.players[a.s.id].x>1040);assert.ok(state.players[a.s.id].moving);
- await wait(400);const stopped=await nextState(a.s);await wait(100);state=await nextState(a.s);
+ const stopped=await nextState(a.s,w=>w.players[a.s.id].x>1040&&!w.players[a.s.id].moving);await wait(100);state=await nextState(a.s);
  assert.equal(state.players[a.s.id].x,stopped.players[a.s.id].x);assert.equal(state.players[a.s.id].moving,false);
  await connect('TEST');await connect('TEST');assert.match((await connect('TEST')).response.error,/cheia/);
  const bId=b.s.id;b.s.disconnect();state=await nextState(a.s,w=>!w.players[bId]);assert.equal(Object.keys(state.players).length,3);

@@ -1,3 +1,4 @@
+import {ATTRIBUTES,RARITIES,level,levelCost,maxEnergy} from './progression.mjs';
 import {createStageTest} from './stage-test.mjs';
 import {t,setText,locale,readLanguage,setLanguage,bindLanguageUI} from './i18n.mjs';
 import {drawTerrain,inLava} from './terrain.mjs';
@@ -7,7 +8,7 @@ import {SLOTS,WEAPONS,ARMOR_SETS,normalizeGear,equipmentStats,unlockTier,equip} 
 import {migrateStorage} from './storage-migration.mjs';
 import {PROP_TYPES,drawProp,depthOrder} from './scenery.mjs';
 import {MAPS,SIZE,ENEMY_TYPES,RADIUS,safePoint,portalsOf,RUNES,RUNE_ORDER,INSCRIPTION,GATE} from './world.mjs';
-import {createWorld,addPlayer,tick,objective,STEP} from './engine.mjs';
+import {createWorld,addPlayer,tick,objective,STEP,playerAction} from './engine.mjs';
 import {applySettings,refreshWorldSettings,getSettings} from './settings.mjs';
 import {decodeSave,encodeSave} from './save.mjs';
 import {newId,readLibrary,putSave,exportSolo,importSolo,LIBRARY_KEY} from './save-library.mjs';
@@ -36,7 +37,7 @@ function save(){
  try{putSave(localStorage,activeSlot,activeName,world,id);setText($('saveStatus'),'Salvo · '+activeName);return true;}
  catch{setText($('saveStatus'),'Falha no armazenamento. Exporte seu save.');return false;}
 }
-function modalOpen(){return ['journal','victory','saves','equipment'].some(x=>$(x).open);}
+function modalOpen(){return ['journal','victory','saves','equipment','bonfire'].some(x=>$(x).open);}
 function inputAllowed(){return world&&$('menu').hidden&&!modalOpen()&&document.visibilityState==='visible';}
 function clearInput(){input={};if(socket?.connected)socket.emit('input',{});}
 function closeDialogs(){for(const d of document.querySelectorAll('dialog'))d.close();}
@@ -71,8 +72,16 @@ function roomRequest(event,data={}){return new Promise((resolve,reject)=>{
  if(!socket?.connected)return reject(new Error('Conecte-se a uma sala primeiro.'));
  socket.timeout(5000).emit(event,data,(error,result)=>error?reject(new Error('O servidor não respondeu.')):result?.error?reject(new Error(result.error)):resolve(result));
 });}
+const number=n=>new Intl.NumberFormat(locale(),{notation:n>=10000?'compact':'standard',maximumFractionDigits:1}).format(n);
+async function progressAction(action,value){if(mode==='online'){const response=await roomRequest('progression',{action,value});world=response.world;}else playerAction(world,world.players[id],action,value);save();}
+function refreshLoot(){const p=world.players[id];$('lootInventory').replaceChildren();$('lootSummary').textContent=`${p.inventory.length}/120 · ${number(p.embers)} ${t('Brasas')}`;for(const item of [...p.inventory].reverse()){const row=document.createElement('div');row.className='loot-row';const name=document.createElement('span'),equipped=Object.values(p.lootGear).includes(item.id);name.textContent=`${t(item.relic?item.name:item.slot==='weapon'?WEAPONS[item.base].name:SLOTS[item.slot])} · ${t(RARITIES[item.rarity])} · ${t('Grau')} ${number(item.rank)} · +${number(item.power*100)}% ${t('Dano')} / ${number(item.defense)}% ${t('Defesa')}${equipped?' ✓':''}`;name.style.color=['#ccc','#a2d8a0','#86cfff','#d7a0ff','#ffd06c'][item.rarity];if(item.relic)name.textContent+=' · '+t({malenio:'Poder solar +15%',warden:'Defesa adicional +10%',titan:'Dano de Q +50%'}[item.relic]);row.append(name);for(const [label,action,value] of [[equipped?'Desequipar':'Equipar',equipped?'unequipItem':'equipItem',equipped?item.slot:item.id],['Desmontar','dismantle',item.id]]){const button=document.createElement('button');setText(button,label);button.disabled=action==='dismantle'&&equipped;button.onclick=async()=>{try{await progressAction(action,value);refreshGear();}catch(e){setText($('gearFeedback'),e.message);}};row.append(button);}$('lootInventory').append(row);}}
+function refreshCamp(){const p=world.players[id];$('campStats').textContent=`${t('Nível')} ${number(level(p))} · ${number(p.embers)} ${t('Brasas')} · ${t('Custo')} ${number(levelCost(p))} · ${t('Jornada')} ${world.cycle+1}`;$('attributes').replaceChildren();for(const [key,label] of Object.entries(ATTRIBUTES)){const button=document.createElement('button');button.textContent=`${t(label)} ${number(p.attributes[key])} +`;button.disabled=p.embers<levelCost(p)||key==='fortune'&&p.attributes[key]>=150||key==='vigor'&&p.attributes[key]>=134;button.onclick=async()=>{try{await progressAction('level',key);refreshCamp();}catch(e){setText($('campFeedback'),e.message);}};$('attributes').append(button);}$('nextCycle').disabled=!!stageTest||!world.won;}
+$('restEnemies').onclick=async()=>{try{await progressAction('rest');setText($('campFeedback'),'Inimigos comuns renovados');refreshCamp();}catch(e){setText($('campFeedback'),e.message);}};
+$('nextCycle').onclick=async()=>{try{await progressAction('cycle');victorySeen=false;$('bonfire').close();canvas.focus();}catch(e){setText($('campFeedback'),e.message);}};
+$('leaveCamp').onclick=async()=>{try{await progressAction('leaveCamp');$('bonfire').close();canvas.focus();}catch(e){setText($('campFeedback'),e.message);}};
+$('bonfire').addEventListener('cancel',e=>{e.preventDefault();$('leaveCamp').click();});
 function refreshGear(){
- const p=world?.players[id];if(!p)return;const gear=normalizeGear(p.character,p.equipment),tier=unlockTier(world),stats=equipmentStats(p);
+ const p=world?.players[id];if(!p)return;refreshLoot();const gear=normalizeGear(p.character,p.equipment),tier=unlockTier(world),stats=equipmentStats(p);
  setText($('gearClass'),p.character==='witch'?'Feiticeira · vestes arcanas':'Guerreiro · armadura de batalha');$('gearSlots').replaceChildren();
  const names=p.character==='witch'?{helmet:'Capuz',chest:'Manto',gloves:'Luvas',legs:'Perneiras',boots:'Botas'}:{helmet:'Elmo',chest:'Peitoral',gloves:'Manoplas',legs:'Grevas',boots:'Botas'};
  for(const slot of ['weapon',...Object.keys(SLOTS)]){
@@ -82,7 +91,7 @@ function refreshGear(){
   select.onchange=async()=>{try{const value=slot==='weapon'?select.value:Number(select.value);if(mode==='online'){const result=await roomRequest('equip',{slot,value});world.players[id].equipment=result.equipment;}else{equip(world,p,slot,value);save();}setText($('gearFeedback'),'Equipamento atualizado.');refreshGear();}catch(error){setText($('gearFeedback'),error.message);refreshGear();}};
   label.append(select);$('gearSlots').append(label);
  }
- setText($('gearStats'),`Dano ${Math.round(stats.weapon.damage*stats.power)} · Defesa ${stats.defense}% · Alcance ${stats.weapon.range} · Energia +${stats.regen.toFixed(1)}/s`);
+ setText($('gearStats'),`Dano ${Math.round(stats.weapon.damage*stats.power*(1+(p.attributes?.strength||0)*.06))} · Defesa ${stats.defense}% · Alcance ${stats.weapon.range} · Energia +${stats.regen.toFixed(1)}/s`);
  setText($('gearUnlocks'),`Q: ${stats.weapon.special}. F: projétil de energia. `+(tier===0?'Derrote os três guardiões para liberar o segundo conjunto.':tier===1?'Derrote Malênio para liberar o último conjunto.':'Todos os conjuntos estão disponíveis.'));
  const preview=$('gearPreview').getContext('2d');preview.clearRect(0,0,180,220);preview.save();preview.translate(90,195);preview.scale(2,2);drawEquipped(preview,{...p,x:0,y:0,direction:'down',facingX:0,facingY:1,moving:false},0);preview.restore();
 }
@@ -127,7 +136,7 @@ async function loadSocket(){
   script.onload=resolve;script.onerror=()=>{script.remove();socketScript=null;reject(new Error('Não foi possível carregar o modo online. O modo solo continua disponível.'));};document.head.append(script);
  });await socketScript;
 }
-function startStageTest(){applySettings(stageTest.settings);world=createStageTest(stageTest.map,stageTest.character);id='solo';mode='solo';activeSlot='';victorySeen=false;closeDialogs();showGame();}
+function startStageTest(){applySettings(stageTest.settings);world=createStageTest(stageTest.map,stageTest.character,stageTest.cycle,stageTest.level,stageTest.embers,stageTest.loot);id='solo';mode='solo';activeSlot='';victorySeen=false;closeDialogs();showGame();}
 async function start(continueSave=false){
  if(stageTest){startStageTest();return;}
  if(joining)return;joining=true;$('start').disabled=true;$('continue').disabled=true;setText($('menuError'),'');
@@ -226,7 +235,7 @@ function drawEnemy(e,time){
  const bob=e.type==='seer'?Math.sin(time*3+e.homeX)*3:e.state==='chase'?Math.sin(time*10)*1.5:0;
  ctx.imageSmoothingEnabled=true;ctx.drawImage(image,-w/2,-h+8+bob,w,h);ctx.restore();
  const bw=e.type==='malenio'?85:55,barY=e.y-h-3;ctx.fillStyle='#151711';ctx.fillRect(e.x-bw/2,barY,bw,5);ctx.fillStyle=e.color;ctx.fillRect(e.x-bw/2,barY,bw*e.hp/e.maxHp,5);
- if(e.type!=='malenio')label(e.name,e.x,barY-7,e.color,10);
+ if(e.type!=='malenio')label(t(e.name)+(e.variant?' · '+t(e.variant):''),e.x,barY-7,e.color,10);
 }
 function drawMapOverlay(p){
  const s=Math.min(width-48,height-170,600),x=(width-s)/2,y=(height-s)/2;
@@ -234,6 +243,7 @@ function drawMapOverlay(p){
  const project=a=>({x:x+a.x/SIZE*s,y:y+a.y/SIZE*s});
  for(const e of world.enemies.filter(e=>e.map===p.map&&e.hp>0)){const q=project(e);circle(q.x,q.y,5,e.color,'#241911');}
  for(const a of [MAPS[p.map].camp,...portalsOf(p.map),...(p.map===2?RUNES:[])]){const q=project(a);circle(q.x,q.y,6,'#e7cc87','#172219');}
+ if(p.bloodstain?.map===p.map){const b=project(p.bloodstain);circle(b.x,b.y,8,'#ffc760','#111');}
  const q=project(p);circle(q.x,q.y,6,'#f6fff2','#213c24');label(MAPS[p.map].name,x+s/2,y-18,'#ead0a0',16);label('Você: branco  •  Guardiões: cores  •  Fogueira e portal: dourado  •  M fecha',x+s/2,y+s+28,'#e9e5ce',Math.min(12,s/43));
 }
 function render(){
@@ -263,6 +273,8 @@ function render(){
   const seer=['seer','shade'].includes(e.type),x=seer?e.aimX:e.x,y=seer?e.aimY:e.y,r=seer?72:e.range*(['malenio','warden'].includes(e.type)&&e.hp<e.maxHp/2?1.2:1);
   circle(x,y,r,'#dc624533','#ffc288');circle(x,y,r*Math.max(0,1-e.timer/e.windup),'#df5c4a33');label('!',x,y-10,'#fff0cb',24);
  }
+ for(const c of world.crates||[])if(c.map===p.map&&!c.broken){ctx.fillStyle='#4a2c18';ctx.fillRect(c.x-22,c.y-30,44,36);ctx.strokeStyle='#d6ac63';ctx.lineWidth=3;ctx.strokeRect(c.x-22,c.y-30,44,36);ctx.beginPath();ctx.moveTo(c.x-20,c.y-28);ctx.lineTo(c.x+20,c.y+4);ctx.moveTo(c.x+20,c.y-28);ctx.lineTo(c.x-20,c.y+4);ctx.stroke();}
+ if(p.bloodstain?.map===p.map){circle(p.bloodstain.x,p.bloodstain.y,16+Math.sin(time*4)*3,'#ffbb5555','#ffda83');label(t('Brasas perdidas'),p.bloodstain.x,p.bloodstain.y-24,'#ffe399');}
  const actors=[...m.props.filter(prop=>!prop.ground).map(prop=>({y:prop.y,order:1,draw:()=>drawProp(ctx,prop,assets[prop.type])})),...world.enemies.filter(e=>e.map===p.map).map(e=>({y:e.y,draw:()=>drawEnemy(e,time)})),...Object.values(world.players).filter(a=>a.map===p.map).map(a=>({y:a.y,draw:()=>{
   ctx.save();if(a.hp<=0)ctx.globalAlpha=.35;else if(a.invuln>0&&Math.floor(time*15)%2)ctx.globalAlpha=.6;
   ctx.fillStyle='#111a1266';ctx.beginPath();ctx.ellipse(a.x,a.y+2,18,7,0,0,7);ctx.fill();drawEquipped(ctx,a,time);ctx.restore();
@@ -283,7 +295,7 @@ function render(){
 }
 function updateHud(){
  if(!world?.players[id])return;const p=world.players[id],m=MAPS[p.map];
- setText($('mapName'),m.name);setText($('healthText'),`Brasa · ${p.hp} / 100`);$('healthFill').style.width=p.hp+'%';setText($('objective'),objective(world));
+ setText($('mapName'),m.name);setText($('healthText'),`Brasa · ${Math.ceil(p.hp)} / ${p.maxHp}`);$('healthFill').style.width=p.hp/p.maxHp*100+'%';$('progressHUD').textContent=`${t('Nível')} ${number(level(p))} · ${number(p.embers)} ${t('Brasas')} · ${t('Jornada')} ${world.cycle+1}`;setText($('objective'),objective(world));
  setText($('network'),mode==='solo'?'Solo':onlineError?'Desconectado':`Sala ${$('room').value.toUpperCase()} · ${Object.keys(world.players).length}/4`);
  $('saveStatus').hidden=mode==='online';if(stageTest)$('saveStatus').textContent='Teste isolado · saves desativados';setText($('dashStatus'),p.dashCd>0?p.dashCd.toFixed(1)+'s':'pronta');
  const message=onlineError||roomSaveError||(p.messageTime>0?p.message:'');$('toast').hidden=!message||!$('menu').hidden;setText($('toast'),message);
@@ -294,6 +306,8 @@ function updateHud(){
  $('interaction').hidden=!prompt||p.hp<=0||!$('menu').hidden;setText($('interaction'),prompt);
  const boss=world.enemies.find(e=>e.type===(p.map===5?'titan':p.map===2?'warden':'malenio'));setText($('bossName'),boss.name);$('bossHud').hidden=![1,2,5].includes(p.map)||boss.hp<=0||!!prompt||!$('menu').hidden;
  $('bossFill').style.width=boss.hp/boss.maxHp*100+'%';
+ if(!world.won)victorySeen=false;if(!p.resting&&$('bonfire').open){$('bonfire').close();canvas.focus();}
+ if(p.resting&&$('menu').hidden&&!$('bonfire').open){closeDialogs();clearInput();setText($('campFeedback'),'');refreshCamp();$('bonfire').showModal();}
  if(p.hp<=0&&$('menu').hidden&&!$('death').open&&!modalOpen())$('death').showModal();
  if(p.hp>0&&$('death').open)$('death').close();
  if(world.won&&!victorySeen&&$('menu').hidden&&!$('death').open){victorySeen=true;clearInput();$('victory').showModal();save();}

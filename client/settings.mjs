@@ -39,5 +39,5 @@ export function applySettings(input,{checkSpawns=true}={}){
  for(const type of Object.keys(ENEMY_TYPES))Object.assign(ENEMY_TYPES[type],next.enemies[type]);Object.assign(TUNING,next.tuning);active=next;return getSettings();
 }
 export function refreshWorldSettings(world){
- for(const e of world.enemies){const ratio=e.maxHp?e.hp/e.maxHp:1,stats=ENEMY_TYPES[e.type];Object.assign(e,stats,{hp:e.hp<=0?0:Math.max(1,Math.round(stats.hp*ratio)),maxHp:stats.hp});}
+ for(const e of world.enemies){const ratio=e.maxHp?e.hp/e.maxHp:1,stats=ENEMY_TYPES[e.type];const cycle=world.cycle||0,maxHp=Math.round(stats.hp*Math.pow(1+cycle,2.3)*(e.variant==='Robusto'?1.25:1)),damage=stats.damage*Math.pow(1+cycle,.9)*(e.variant==='Feroz'?1.2:1),speed=stats.speed*(1+Math.min(.35,cycle*.02))*(e.variant==='Ágil'?1.15:1);Object.assign(e,stats,{damage,speed,hp:e.hp<=0?0:Math.max(1,Math.round(maxHp*ratio)),maxHp});}
 }
