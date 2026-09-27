@@ -1,0 +1,31 @@
+{
+  "generator": "Built-in image_gen",
+  "transparent_background": true,
+  "assets": [
+    {
+      "name": "hollow",
+      "prompt": "Use case: stylized-concept. Asset: single production-ready 2D RPG sprite, one isolated subject, full body, front three-quarter view seen slightly from above for a top-down dark fantasy game. Hand-painted detailed pixel-art aesthetic, muted earth colors, sharp readable silhouette at 80px height, light from upper left, subject centered and fills 85% canvas with feet/base near bottom. Genuine transparent alpha background. NO backdrop, ground tile, square, border, UI, labels, text, watermark, contact sheet or multiple views.\nSubject: Sentinela Oca: undead armored medieval sentinel, weathered iron helmet with two glowing amber eyes, battered rusty plate armor, torn dark burgundy tabard, short sword and small round shield, ominous but no gore.",
+      "path": "client/sprites/hollow-generated.png"
+    },
+    {
+      "name": "ember",
+      "prompt": "Use case: stylized-concept. Asset: single production-ready 2D RPG sprite, one isolated subject, full body, front three-quarter view seen slightly from above for a top-down dark fantasy game. Hand-painted detailed pixel-art aesthetic, muted earth colors, sharp readable silhouette at 80px height, light from upper left, subject centered and fills 85% canvas with feet/base near bottom. Genuine transparent alpha background. NO backdrop, ground tile, square, border, UI, labels, text, watermark, contact sheet or multiple views.\nSubject: Devorador de Brasas: squat hulking living volcanic rock creature, two heavy arms and legs, angular cracked basalt plates with glowing orange molten fissures and an exposed ember heart, hunched monster silhouette, no ground lava.",
+      "path": "client/sprites/ember-generated.png"
+    },
+    {
+      "name": "seer",
+      "prompt": "Use case: stylized-concept. Asset: single production-ready 2D RPG sprite, one isolated subject, full body, front three-quarter view seen slightly from above for a top-down dark fantasy game. Hand-painted detailed pixel-art aesthetic, muted earth colors, sharp readable silhouette at 80px height, light from upper left, subject centered and fills 85% canvas with feet/base near bottom. Genuine transparent alpha background. NO backdrop, ground tile, square, border, UI, labels, text, watermark, contact sheet or multiple views.\nSubject: Vidente do Eclipse: sinister slender sorceress floating just above her feet, tattered muted violet robes and deep hood hiding face except two pale lavender eyes, gnarled staff bearing a small dim amethyst orb, no large aura beyond silhouette.",
+      "path": "client/sprites/seer-generated.png"
+    },
+    {
+      "name": "malenio",
+      "prompt": "Use case: stylized-concept. Asset: single production-ready 2D RPG sprite, one isolated subject, full body, front three-quarter view seen slightly from above for a top-down dark fantasy game. Hand-painted detailed pixel-art aesthetic, muted earth colors, sharp readable silhouette at 80px height, light from upper left, subject centered and fills 85% canvas with feet/base near bottom. Genuine transparent alpha background. NO backdrop, ground tile, square, border, UI, labels, text, watermark, contact sheet or multiple views.\nSubject: Malênio, o Rei sem Aurora: imposing fallen king in tarnished gold armor with dark burgundy ragged cloak, antler-like broken crown, ornate long scepter, full body, pale shadowed face, melancholic dark fantasy final boss.",
+      "path": "client/sprites/malenio-generated.png"
+    },
+    {
+      "name": "bonfire",
+      "prompt": "Use case: stylized-concept. Asset: single production-ready 2D RPG sprite, one isolated subject, full body, front three-quarter view seen slightly from above for a top-down dark fantasy game. Hand-painted detailed pixel-art aesthetic, muted earth colors, sharp readable silhouette at 80px height, light from upper left, subject centered and fills 85% canvas with feet/base near bottom. Genuine transparent alpha background. NO backdrop, ground tile, square, border, UI, labels, text, watermark, contact sheet or multiple views.\nSubject: Small medieval campfire checkpoint: low ring of irregular gray stones, three charred crossed logs, modest warm amber flame and a few tiny sparks. Restrained natural fire colors, detailed painterly pixel art matching an earthy ruined fantasy garden. No sword, no character, no yellow square, no white matte, no tile, no background glow outside the fire. Entire ring and flames isolated on true transparency.",
+      "path": "client/sprites/bonfire-generated.png"
+    }
+  ]
+}

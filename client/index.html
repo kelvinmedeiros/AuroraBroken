@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+ <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+ <meta name="theme-color" content="#151714"><title>AuroraBroken — O Sol Partido</title>
+ <link rel="stylesheet" href="style.css">
+</head>
+<body>
+ <canvas id="gameCanvas" tabindex="0" aria-label="Mundo de AuroraBroken. Use WASD ou setas para mover, espaço para atacar, Shift para esquivar e E para interagir."></canvas>
+ <header id="hud" hidden>
+  <div class="crest">A<span>✦</span></div><div class="status"><small id="mapName"></small><strong id="healthText">Brasa · 100 / 100</strong><div class="health-track"><i id="healthFill"></i></div></div>
+  <div class="quest"><small>SUA JORNADA</small><span id="objective"></span></div>
+  <div class="tools"><span id="network">Solo</span><button id="gearButton">Equipar I</button><button id="saveButton">Saves</button><button id="journalButton" title="Diário (J)">Diário <kbd>J</kbd></button><button id="mapButton" title="Mapa (M)">Mapa <kbd>M</kbd></button><button id="menuButton" aria-label="Abrir menu">☰</button></div>
+ </header>
+ <div id="toast" role="status" hidden></div>
+ <div id="bossHud" hidden><small id="bossName">MALÊNIO, O REI SEM AURORA</small><div><i id="bossFill"></i></div></div>
+ <footer id="controls" hidden><span><kbd>WASD</kbd> mover</span><span><kbd>Espaço</kbd> atacar</span><span><kbd>Shift</kbd> esquivar <b id="dashStatus"></b></span><span><kbd>E</kbd> interagir</span><span id="combatStatus"></span><span id="saveStatus">Progresso solo salvo neste navegador</span></footer>
+ <div id="interaction" hidden></div>
+ <div id="touch" hidden><div class="dpad"><button data-key="up" aria-label="Mover para cima">↑</button><button data-key="left" aria-label="Mover para esquerda">←</button><button data-key="down" aria-label="Mover para baixo">↓</button><button data-key="right" aria-label="Mover para direita">→</button></div><div><button data-key="attack">Atacar</button><button data-key="special">Q</button><button data-key="ranged">F</button><button data-key="dash">Esquivar</button><button data-key="interact">E</button></div></div>
+ <main id="menu" class="overlay">
+  <section class="title-card">
+   <div class="eyebrow">AURORABROKEN <span>✦</span> UMA JORNADA ENTRE BRASAS</div>
+   <h1 class="brand-title"><img src="sprites/aurorabroken-logo.png" alt="AuroraBroken"></h1>
+   <p class="intro">O rei roubou a aurora. Você carrega a última brasa.</p>
+   <p class="story">Liberte os guardiões do Jardim, atravesse o selo e devolva a luz à Cidadela. Toda queda deixa uma brasa. Toda brasa, um recomeço.</p>
+   <div class="section-label">01 <span>ESCOLHA SEU GUARDIÃO</span></div>
+   <div class="characters"><button class="character selected" data-character="warrior" aria-pressed="true"><canvas width="80" height="80" data-preview="warrior"></canvas><span><strong>Guerreiro</strong><small>Lâmina • rápido e próximo</small></span></button><button class="character" data-character="witch" aria-pressed="false"><canvas width="80" height="80" data-preview="witch"></canvas><span><strong>Feiticeira</strong><small>Brasa arcana • maior alcance</small></span></button></div>
+   <div class="section-label">02 <span>COMO VOCÊ QUER JOGAR?</span></div>
+   <div class="modes"><label><input type="radio" name="mode" value="solo" checked> Solo <small>Sem conexão multiplayer</small></label><label><input type="radio" name="mode" value="online"> Cooperativo <small>Até 4 na mesma sala</small></label></div>
+   <div id="roomField" hidden><label>Sala <input id="room" maxlength="20" value="AURORA" autocomplete="off" spellcheck="false"></label><label>Seu nome <input id="playerName" maxlength="24" value="Aurora" autocomplete="off"></label><small>Use a mesma sala nos dois PCs. Este nome identifica seu perfil neste navegador.</small><p id="lanInfo">Carregando endereços da rede local…</p></div>
+   <p id="menuError" role="alert"></p>
+   <div class="start-actions"><button id="start" class="primary" disabled>Carregando o mundo…</button><button id="continue" hidden>Continuar jornada</button><button id="menuSaves">Arquivos e saves</button><button id="resume" hidden>Voltar ao jogo</button></div>
+   <a id="adminLink" href="admin.html" target="_blank" hidden style="color:#ddbc7a">Painel de administração ↗</a><div class="menu-foot">WASD para explorar <span>✦</span> Espaço para lutar <span>✦</span> Shift para esquivar</div>
+  </section>
+  <aside class="cover"><div class="sun">✦</div><div><small>CAPÍTULO I</small><h2>Nem toda luz<br>se apaga.</h2><p>Jardim das Cinzas / Reino da Aurora</p></div></aside>
+ </main>
+ <dialog id="journal"><button class="close" aria-label="Fechar diário">×</button><small class="eyebrow">FRAGMENTOS DE UM REINO</small><h2>O livro das brasas</h2><p>Malênio guardava o Sol da Aurora. Quando a noite levou sua família, ele partiu o astro e prendeu a manhã na Cidadela, prometendo que nada mais mudaria. Sem aurora, as lembranças viraram cinza.</p><p>Você é um Portador: alguém capaz de devolver calor às memórias. O Guerreiro carrega a lâmina dos antigos vigias. A Feiticeira aprendeu a ouvir as brasas que ainda cantam.</p><div id="bestiary"></div><h3>Seu caminho</h3><p id="journalQuest"></p><p>Derrote os três guardiões do Jardim. O portal ao norte leva à Cidadela; o portal ao sul permite voltar. Fogueiras restauram a vida. I abre equipamentos; Q usa a técnica da arma; F lança um projétil. Complete o Jardim para liberar o segundo conjunto de armadura e derrote Malênio para obter o terceiro. Guardiões vencidos permanecem vencidos. No cooperativo, a jornada e os inimigos são compartilhados na sala.</p><p class="muted">Espaço: ataque na direção em que você olha. Saia das áreas marcadas antes do impacto. Shift: esquiva com breve invulnerabilidade. R: renascer após cair. F3: visualizar colisões.</p></dialog>
+ <dialog id="death"><small class="eyebrow">A CHAMA AINDA VIVE</small><h2>Das cinzas,<br>outra vez.</h2><p>Os guardiões derrotados não retornam. Reúna suas forças na fogueira.</p><button id="respawn" class="primary">Renascer na fogueira · R</button></dialog>
+ <dialog id="victory"><small class="eyebrow">AURORA RESTAURADA</small><h2>O Sol retorna.</h2><p>O Custódio entrega a primeira brasa. As runas libertam a aurora da cripta e a luz atravessa a Cidadela. O reino finalmente pode seguir em frente.</p><button id="explore" class="primary">Continuar explorando</button></dialog>
+ <dialog id="saves"><button class="close" id="closeSaves" aria-label="Fechar saves">×</button><small class="eyebrow">SUAS JORNADAS</small><h2>Arquivos e saves</h2>
+  <p id="activeSave">Nenhuma partida ativa.</p><button id="saveNow" class="primary">Salvar partida atual</button>
+  <h3>Campanhas solo</h3><label for="saveList">Save selecionado</label><select id="saveList"></select><label for="saveName">Nome do arquivo</label><input id="saveName" maxlength="60" placeholder="Nome da jornada"><div class="save-actions"><button id="loadSelected">Carregar selecionado</button><button id="renameSave">Renomear</button><button id="exportSolo">Exportar solo (.json)</button><button id="importSolo">Importar solo</button></div>
+  <p class="muted">Novas jornadas e arquivos importados criam saves separados. O autosave atualiza somente a campanha em andamento. Exporte o arquivo para levar o progresso a outro PC.</p>
+  <h3>Sala multiplayer</h3><p id="roomSaveInfo">Entre em uma sala para salvar ou exportar sua campanha cooperativa.</p><div class="save-actions"><button id="exportRoom">Exportar sala (.json)</button><button id="importRoom">Restaurar sala de arquivo</button></div><p class="muted">A sala salva automaticamente no servidor a cada 5 segundos e ao sair. Só seu criador, sozinho na sala, pode restaurar um arquivo. Crie outro código de sala para uma campanha separada.</p>
+  <p id="saveFeedback" role="status"></p><input id="saveFile" type="file" accept=".json,application/json" hidden>
+ </dialog>
+ <dialog id="equipment"><button id="closeGear" class="close" aria-label="Fechar equipamentos">×</button><small class="eyebrow">ARSENAL DO PORTADOR</small><h2>Armas e armaduras</h2><p id="gearClass"></p><div class="gear-layout"><canvas id="gearPreview" width="180" height="220" aria-label="Aparência do equipamento atual"></canvas><div id="gearSlots"></div></div><p id="gearStats"></p><p id="gearUnlocks"></p><p id="gearFeedback" role="status"></p><p class="muted">Espaço: ataque básico. Q: técnica da arma (30 energia). F: projétil perfurante (40 energia). A energia se regenera durante a exploração. Peças podem ser combinadas individualmente.</p></dialog>
+ <script type="module" src="game.js"></script>
+</body></html>
+

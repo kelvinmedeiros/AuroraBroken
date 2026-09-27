@@ -1,0 +1,30 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {mkdtempSync,readFileSync,writeFileSync,existsSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import path from 'node:path';
+import {createWorld,addPlayer} from '../client/engine.mjs';
+import {encodeSave,SAVE_KEY} from '../client/save.mjs';
+import {putSave,readLibrary,exportSolo,importSolo} from '../client/save-library.mjs';
+import {RoomStore,newRoom,joinProfile,hashToken,captureRoom,restoreRoom} from '../api/room-store.mjs';
+const storage=()=>{const data=new Map();return {getItem:key=>data.get(key)||null,setItem:(key,value)=>data.set(key,value)};};
+test('solo library migrates the old save, isolates campaigns and round-trips separate files',()=>{
+ const disk=storage(),w=createWorld(),p=addPlayer(w,'solo');disk.setItem(SAVE_KEY,encodeSave(w,'solo'));
+ assert.equal(readLibrary(disk)[0].name,'Jornada original');
+ putSave(disk,'one','Guerreiro',w,'solo');p.character='witch';p.hp=51;putSave(disk,'two','Feiticeira',w,'solo');
+ const entries=readLibrary(disk);assert.equal(entries.length,3);assert.equal(JSON.parse(entries.find(e=>e.id==='one').data).player.hp,100);
+ const incoming=importSolo(disk,exportSolo(entries.find(e=>e.id==='two')));assert.notEqual(incoming.id,'two');assert.equal(JSON.parse(incoming.data).player.hp,51);assert.equal(readLibrary(disk).length,4);
+ assert.throws(()=>importSolo(disk,'broken'));assert.throws(()=>importSolo(disk,JSON.stringify({kind:'multiplayer'})),/multiplayer/);
+});
+test('room files persist progress and identity independently, with valid backup recovery',()=>{
+ const folder=mkdtempSync(path.join(tmpdir(),'aurorabroken-save-test-')),store=new RoomStore(folder),hash=hashToken('a'.repeat(64));
+ const room=newRoom(hash),p=joinProfile(room,'socket1',hash,'witch','Aurora');p.hp=55;room.world.enemies[0].hp=0;
+ store.save('ONE',room);p.hp=62;store.save('ONE',room);store.save('TWO',newRoom(hash));
+ assert.ok(existsSync(path.join(folder,'ONE.json.bak')));
+ const loaded=store.load('ONE');assert.equal(loaded.world.enemies[0].hp,0);assert.equal(Object.keys(loaded.world.players).length,0);
+ assert.equal(joinProfile(loaded,'socket2',hash,'warrior','Aurora').hp,62);assert.equal(loaded.world.players.socket2.character,'witch');assert.equal(store.load('TWO').world.enemies[0].hp,65);
+ writeFileSync(path.join(folder,'ONE.json'),'broken');const recovered=store.load('ONE');assert.equal(recovered.profiles[hash].hp,55);store.save('ONE',recovered);
+ assert.doesNotThrow(()=>JSON.parse(readFileSync(path.join(folder,'ONE.json.bak'),'utf8')));
+ assert.throws(()=>store.load('../escape'),/inválida/);
+ const exportData=captureRoom(room,'ONE');assert.ok(restoreRoom(exportData));assert.throws(()=>restoreRoom({...exportData,enemies:[]}),/incompleta/);
+});

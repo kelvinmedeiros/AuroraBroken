@@ -1,0 +1,52 @@
+{
+  "method": "Built-in imagegen",
+  "assets": [
+    {
+      "name": "ground-garden",
+      "ref": "map-hd.png",
+      "prompt": "Edit this map into a GROUND-ONLY background layer for a top-down RPG. Remove ALL raised objects: every tree, canopy, bush, dry branch, log, rock, ruin, building, wall, statue, campfire and debris. Remove the lakes and crater too, replacing them with grass and dirt. Keep the branching beige footpaths in approximately the same positions and the mossy olive-green grass colors. Inpaint empty ground where all objects were. The entire square must be flat ground only, uninterrupted to all four edges, NO border or walls. Subtle grass blades and tiny ground speckles only. No cast object shadows, no objects, no logos or text. High-resolution square map background.",
+      "output": "client/sprites/ground-garden.png"
+    },
+    {
+      "name": "ground-ash",
+      "ref": "map2-hd.png",
+      "prompt": "Edit this map into a GROUND-ONLY layer for a top-down RPG. Remove ALL raised objects and their shadows: the entire castle, gate, walls, trees, branches, stumps, rocks, bones, barrels, ruins and debris. Remove the lava/pond and sky strip, replace with ground. Retain warm gray-brown and muted burnt-orange cracked soil plus beige branching trails approximately in the same positions. Fill former castle area with flat weathered soil. Ground must fill the entire square to every edge. NO building, no objects, no logo, no border, no text. High-resolution square map background.",
+      "output": "client/sprites/ground-ash.png"
+    },
+    {
+      "name": "prop-tree",
+      "prompt": "Production asset for AuroraBroken, a muted earthy dark-fantasy top-down 2D RPG. Hand-painted pixel-art texture, strong readable silhouettes, orthographic camera looking down at 60 degrees, facing south, no isometric diagonal view. One isolated broad deciduous tree, dense rounded moss-green canopy with visible top, sturdy short brown trunk at bottom center. Entire tree visible, canopy much wider than trunk. Root contact point at 85% image height. No ground patch, no large cast shadow, genuine transparent background. Sprite only, no text.",
+      "output": "client/sprites/prop-tree.png"
+    },
+    {
+      "name": "prop-dead-tree",
+      "prompt": "Production asset for AuroraBroken, a muted earthy dark-fantasy top-down 2D RPG. Hand-painted pixel-art texture, strong readable silhouettes, orthographic camera looking down at 60 degrees, facing south, no isometric diagonal view. One isolated old leafless tree with twisting dark dry branches, thick central trunk and short exposed roots. Full silhouette visible. Branches mostly spread over upper three quarters; trunk base at 88% image height. No ground patch, no rocks, no large cast shadow. Genuine transparent background, sprite only, no text.",
+      "output": "client/sprites/prop-dead-tree.png"
+    },
+    {
+      "name": "prop-rock",
+      "prompt": "Production asset for AuroraBroken, a muted earthy dark-fantasy top-down 2D RPG. Hand-painted pixel-art texture, strong readable silhouettes, orthographic camera looking down at 60 degrees, facing south, no isometric diagonal view. One isolated squat cluster of three weathered gray boulders with moss traces. Compact oval base, readable rocky top and short south-facing sides. Entire object visible with base at 85% image height. No floor or scenery, no text. Genuine transparent background.",
+      "output": "client/sprites/prop-rock.png"
+    },
+    {
+      "name": "prop-log",
+      "prompt": "Production asset for AuroraBroken, a muted earthy dark-fantasy top-down 2D RPG. Hand-painted pixel-art texture, strong readable silhouettes, orthographic camera looking down at 60 degrees, facing south, no isometric diagonal view. One isolated fallen dead branch/log lying diagonally on ground, weathered bark with two short broken twigs. Viewed from above. Small environmental prop only, no attached ground, no text. Genuine transparent background.",
+      "output": "client/sprites/prop-log.png"
+    },
+    {
+      "name": "prop-shrine",
+      "prompt": "Production asset for AuroraBroken, a muted earthy dark-fantasy top-down 2D RPG. Hand-painted pixel-art texture, strong readable silhouettes, orthographic camera looking down at 60 degrees, facing south, no isometric diagonal view. One compact ruined square stone shrine, mossy gray blocks, two broken rear pillars, dark altar with faint gold sun emblem, visible floor inside, low front steps. Entire building viewed from above including roofless interior. No surrounding landscape, no ground outside building, no characters, no text. Genuine transparent background. Occupy most image with narrow transparent margin.",
+      "output": "client/sprites/prop-shrine.png"
+    },
+    {
+      "name": "prop-castle",
+      "prompt": "Production asset for AuroraBroken, a muted earthy dark-fantasy top-down 2D RPG. Hand-painted pixel-art texture, strong readable silhouettes, orthographic camera looking down at 60 degrees, facing south, no isometric diagonal view. One isolated ruined gothic citadel, symmetrical front-facing south gate, two squat gold domes, four stone towers, broken crenellations, muted ash gray stone and tarnished brass. Camera looks down strongly with roofs visible. Full structure and foundation entirely visible, compact wide silhouette. No sky, NO surrounding landscape, no outer perimeter walls, no ground beyond the building, no characters or text. Genuine transparent background. Narrow transparent margins.",
+      "output": "client/sprites/prop-castle.png"
+    },
+    {
+      "name": "aurorabroken-logo",
+      "prompt": "Logo for a dark fantasy action RPG. Exact title text: AuroraBroken (spelled A u r o r a B r o k e n, no spaces). Highly readable elegant custom serif lettering, pale aged gold with subtle weathered stone texture. Above the title a circular rising sun fractured into two slightly separated halves, amber light in the crack, restrained mystical rays. Horizontal lockup, emblem centered above lettering, premium understated old-world game branding. Only the emblem and the exact word AuroraBroken. No subtitle, no other text, no background scene, no mockup, no border. True transparent alpha background.",
+      "output": "client/sprites/aurorabroken-logo.png"
+    }
+  ]
+}

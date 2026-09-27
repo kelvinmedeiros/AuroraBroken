@@ -1,0 +1,18 @@
+[
+  {
+    "name": "ground-dungeon",
+    "prompt": "Square GROUND ONLY texture map for AuroraBroken top-down dark-fantasy RPG. Orthographic straight overhead view of an ancient castle crypt floor, dark blue-gray stone flagstones, worn pale stone pathways forming a central north-south aisle and broad open rooms. Subtle moss between stones, restrained amber dust, painterly pixel-art texture matching classic RPGs. Flat uninterrupted floor fills whole image. No walls, no columns, no objects, no furniture, no stairs, no symbols, no text, no perspective horizon, no black voids. Objects will be separate game sprites."
+  },
+  {
+    "name": "prop-barrier",
+    "prompt": "One isolated low ruined stone barricade wall for a dark fantasy top-down RPG, horizontal left-to-right segment of gray masonry, moss traces, some missing stones along top. Camera looking down from 60 degrees, front faces bottom. Compact long rectangle, width four times height. Entire wall visible. Hand-painted pixel-art texture and muted earthy palette. True transparent alpha background, no ground patch, no scenery, no text. Narrow transparent margin."
+  },
+  {
+    "name": "shade-topdown",
+    "prompt": "One isolated enemy sprite for AuroraBroken top-down RPG: an ash-blue hooded crypt specter, short compact body with visible top of hood and shoulders, glowing cyan eyes, tattered robe, small sickle. Camera orthographic looking down 60 degrees, faces south towards bottom. Traditional RPG proportions, hand-painted pixel-art texture, readable at 80px tall. Entire body visible. True transparent background, no ground square, no text, no scene."
+  },
+  {
+    "name": "warden-topdown",
+    "prompt": "One isolated boss sprite for AuroraBroken top-down RPG: the Custodian of Dawn, compact ancient armored knight of tarnished brass and obsidian, broken sun halo behind helmet, broad shoulders, heavy runic hammer. Camera orthographic looking DOWN at 60 degrees, facing SOUTH. Visible top of helmet and shoulders, foreshortened legs, classic RPG proportions rather than realistic tall character art. Muted painterly pixel-art texture, readable at 110px tall. Full body visible. True transparent alpha, no ground tile, no text, no scene."
+  }
+]

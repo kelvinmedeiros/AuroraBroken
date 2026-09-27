@@ -1,0 +1,14 @@
+{
+  "name": "aurora-broken",
+  "version": "1.0.0",
+  "description": "AuroraBroken - A multiplayer game",
+  "scripts": {
+    "start": "node api/server.js",
+    "dev": "node --watch api/server.js",
+    "test": "node --test tests/*.test.mjs",
+    "install-all": "npm install && cd api && npm install && cd ../client && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+} 
