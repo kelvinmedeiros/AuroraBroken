@@ -67,7 +67,7 @@ test('portal lock, safe return, cooldown and defeated enemies persist',()=>{
 test('checkpoint recovery, death reset and victory survive save/load',()=>{
  const w=createWorld(),p=addPlayer(w,'a');p.portalCd=0;p.hp=30;assert.ok(interact(w,p));assert.equal(p.hp,100);
  w.enemies[0].hp=0;p.hp=0;assert.ok(respawn(w,p));assert.equal(p.hp,100);assert.equal(w.enemies[0].hp,0);
- const boss=w.enemies.find(e=>e.type==='warden');boss.hp=0;w.puzzle={progress:3,solved:true};w.won=true;
+ const boss=w.enemies.find(e=>e.type==='titan');boss.hp=0;w.puzzle={progress:3,solved:true};w.won=true;
  const loaded=decodeSave(encodeSave(w,'a'));assert.equal(loaded.won,true);assert.equal(loaded.enemies[0].hp,0);
  assert.equal(decodeSave('broken'),null);
  const unsafe=decodeSave(JSON.stringify({version:1,player:{x:NaN,y:-8,map:99,hp:999,character:'bad'},enemies:[]}));assert.equal(unsafe.players.solo.hp,100);assert.equal(unsafe.players.solo.character,'warrior');assert.equal(unsafe.players.solo.map,0);
@@ -93,8 +93,8 @@ test('both classes can defeat the boss using normal movement, attacks and timed 
 
 test('co-op damage, victory and respawn use one shared world and preserve allies',()=>{
  const w=createWorld(),a=addPlayer(w,'a'),b=addPlayer(w,'b','witch');
- const boss=w.enemies.find(e=>e.type==='warden');w.enemies=[boss];boss.hp=45;w.puzzle={progress:3,solved:true};Object.assign(boss,{x:1030,y:1100});
- Object.assign(a,{map:2,x:1030,y:1180,facingX:0,facingY:-1});Object.assign(b,{map:2,x:1040,y:1190,facingX:0,facingY:-1});
+ const boss=w.enemies.find(e=>e.type==='titan');w.enemies=[boss];boss.hp=45;w.puzzle={progress:3,solved:true};Object.assign(boss,{x:1030,y:1100});
+ Object.assign(a,{map:5,x:1030,y:1180,facingX:0,facingY:-1});Object.assign(b,{map:5,x:1040,y:1190,facingX:0,facingY:-1});
  attack(w,a);assert.equal(boss.hp,21);attack(w,b);assert.equal(boss.hp,0);assert.ok(w.won);assert.match(a.message,/aurora/);assert.equal(a.message,b.message);
  boss.hp=100;a.hp=0;const bx=b.x;respawn(w,a);assert.equal(boss.hp,100);assert.equal(b.x,bx);assert.equal(a.hp,100);
 });

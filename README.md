@@ -32,7 +32,7 @@ npm ci
 npm run build:pages
 ```
 
-Upload the **contents of `dist/pages/`** to any static host. The folder contains `index.html`, `game.js`, `style.css`, `.nojekyll` and the required sprites. All asset paths are relative, so project sites such as `/AuroraBroken/` work. The build excludes server files, private saves, admin settings and unused artwork. Three maps, combat, equipment, languages, browser autosaves and solo JSON import/export remain available. Co-op and server administration are unavailable in this edition.
+Upload the **contents of `dist/pages/`** to any static host. The folder contains `index.html`, `game.js`, `style.css`, `.nojekyll` and the required sprites. All asset paths are relative, so project sites such as `/AuroraBroken/` work. The build excludes server files, private saves, admin settings and unused artwork. Six maps, combat, equipment, languages, browser autosaves and solo JSON import/export remain available. Co-op and server administration are unavailable in this edition.
 
 Run `npm run preview:pages` to test at [localhost:4173/AuroraBroken/](http://localhost:4173/AuroraBroken/), using only a static file server. Do not open `index.html` directly with `file://`.
 
@@ -61,9 +61,23 @@ Attacks cannot pass through solid obstacles. Enemy circles warn you where damage
 
 Defeat the three guardians in the **Garden of Ash** to open its northern portal. The **Citadel of the Shattered Sun** has a return portal to the south. Defeat Malênio, then enter the castle through the portal by its facade.
 
-The third stage, **Crypt of the First Dawn**, contains seven enemies, including Crypt Shades and the Warden boss. Read the inscription with E and activate the three runes in the indicated order to open the northern chamber. Defeat the Warden to complete the story.
+The third stage, **Crypt of the First Dawn**, contains seven enemies, including Crypt Shades and the Warden boss. Read the inscription with E and activate the three runes in the indicated order to open the northern chamber. Defeat the Warden to open the next chapter.
 
 Defeated enemies stay defeated when you change maps. Respawning resets surviving enemies on the map where you died only when no other living player is fighting there.
+
+## Beyond the crypt: the final ascent
+
+After defeating the Warden, use the northern portal in the crypt to continue:
+
+- **Stairway of the Condemned:** a long climb with landings, solid side walls and seven monsters. Clear them to open the furnace entrance.
+- **Furnace of Broken Bridges:** five guardians patrol stone islands joined by narrow bridges. Lava deals **18 damage every 0.7 seconds**, ignoring armor and dodge invulnerability. Step back onto stone to stop taking damage. The floor geometry used for drawing is the same geometry checked for lava damage. The monsters are not affected by lava.
+- **Throne of the Devoured Sun:** face **Asterion, the Sun Devourer**, a 1,800-health titan drawn over five times taller than the player. He alternates a close stomp, an eruption at your marked position and a solar shockwave with a safe inner circle. Below half health his warning time shortens and attack areas grow. Defeating him restores dawn and completes the campaign.
+
+Each new stage has a bonfire, a safe arrival point and a return portal. Upper exits in the stairway and furnace remain sealed until the local monsters are defeated. These rules run identically in solo, authoritative co-op and the standalone GitHub Pages build. The English/Portuguese selector includes the new objectives, enemy lore and attack warnings.
+
+Older three-stage campaigns keep their defeated enemies, armor and bonfires. Their completed crypt becomes the starting point for the new ascent; the new enemies start alive. Server settings migrate to six stages while keeping existing custom polygons and difficulty, with a backup at `config/world-settings.json.before-finale.bak`.
+
+New sprite and floor prompts are in `client/sprites/finale-prompts.json`; `client/terrain.mjs` defines safe platform rectangles and terrain drawing. The admin editor includes all six maps and Asterion's difficulty settings.
 
 ## Weapons and armor
 
@@ -114,13 +128,13 @@ Saves are outside the public client directory and excluded from Git. Set `SAVE_D
 
 ## Layered scenery and depth
 
-All three maps use ground-only images: `ground-garden.png`, `ground-ash.png` and `ground-dungeon.png`. Trees, dead trees, rocks, branches, barriers, the shrine and the castle are separate transparent PNGs. The Garden has 62 scenery objects and the Citadel has 59, including perimeter trees, extra rocks and ruined barriers. The crypt has 15 objects and a wall separating its chambers, with a central passage controlled by the puzzle.
+All six maps use ground-only images: `ground-garden.png`, `ground-ash.png` `ground-dungeon.png` and `ground-lava.png`. Stairway steps, safe lava platforms and the throne arena markings are rendered above these reusable textures. Trees, dead trees, rocks, branches, barriers, the shrine and the castle are separate transparent PNGs. The Garden has 62 scenery objects and the Citadel has 59, including perimeter trees, extra rocks and ruined barriers. The crypt has 15 objects and a wall separating its chambers, with a central passage controlled by the puzzle.
 
 Rendering order is ground, low branches and shadows, then tall objects and actors sorted by their feet's Y position. Walking north of a tree places the character behind its canopy; walking south places the character in front. Only the trunk's base blocks movement. Enemies follow the same visual rules in solo and co-op.
 
 `client/scenery.mjs` defines each object's type, position, width, ground anchor and collision footprint. Edit `SCENERY` to place objects and `PROP_TYPES` to adjust dimensions. The admin editor shows props over the ground, with a toggle to hide them. Editing collision polygons does not move the artwork.
 
-Active ground textures are **1254 × 1254** pixels. Each logical map is **2048 × 2048** world units; collision geometry is independent of image resolution. Older map artwork is kept only as reference. Fallen branches are decorative.
+Generated ground textures are **1254 × 1254** pixels. Each logical map is **2048 × 2048** world units; collision geometry is independent of image resolution. Older map artwork is kept only as reference. Fallen branches are decorative.
 
 ## Administration
 
@@ -152,12 +166,12 @@ The server rejects out-of-range values, self-intersecting or zero-area polygons,
 - `client/collisions.json`: legacy Tiled geometry, kept as reference. Active footprints come from `scenery.mjs` with admin edits applied by `settings.mjs`.
 - `docs/`: gameplay GIF and screenshots.
 
-The six enemy types use generated top-down images in `client/sprites/*-topdown.png`, with subtle motion applied by the renderer rather than directional animation sheets. Bonfires use transparent `bonfire-unlit.png` and `bonfire-lit.png`. Logo, props and floor textures were also generated with imagegen. Prompts are recorded in `client/sprites/topdown-prompts.json`, `layers-prompts.json` and `expansion-prompts.json`.
+The seven enemy types use generated top-down images in `client/sprites/*-topdown.png`, with subtle motion applied by the renderer rather than directional animation sheets. Bonfires use transparent `bonfire-unlit.png` and `bonfire-lit.png`. Logo, props and floor textures were also generated with imagegen. Prompts are recorded in `client/sprites/topdown-prompts.json`, `layers-prompts.json` and `expansion-prompts.json`.
 
 ## Compatibility and verification
 
 Legacy scenery settings migrate once to the layered collision footprints, preserving difficulty and creating `config/world-settings.json.before-layers.bak`. Two-stage settings migrate to three stages, preserving custom collisions and adding new footprints; the backup is `config/world-settings.json.before-dungeon.bak`.
 
-Older solo saves and multiplayer identities are copied to the current browser keys without deleting the originals; concurrent campaigns are reconciled by update time. Old campaigns retain defeated guardians and receive the seven crypt enemies. Final victory now requires the solved puzzle and defeated Warden. Existing bonfires remain lit; the new crypt bonfire starts unlit.
+Older solo saves and multiplayer identities are copied to the current browser keys without deleting the originals; concurrent campaigns are reconciled by update time. Old campaigns retain defeated guardians and receive the seven crypt enemies. Final victory requires the solved puzzle and defeated Asterion. Defeating the Warden now unlocks the stairway. Existing bonfires remain lit; the new crypt bonfire starts unlit.
 
 `npm test` covers attack range and direction, dodging, collision geometry and reachability, portals, bosses, real Socket.IO rooms, separate saves, server restarts, bonfires, admin access and revision control, depth ordering, canopy traversal, castle entry, runes, the dungeon seal, all six weapons, energy costs, armor defense, save migration and localization.

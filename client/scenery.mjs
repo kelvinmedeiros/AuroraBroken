@@ -40,7 +40,13 @@ SCENERY.push([
  ...[[320,1800,100],[1750,1160,100],[650,350,100]].map((p,i)=>prop('cripta-galho-'+i,'log',...p))
 ]);
 
-export function sceneryObstacles(map){const fixed=map===2?[{name:'Parede selada oeste',points:[[0,855],[934,855],[934,905],[0,905]]},{name:'Parede selada leste',points:[[1114,855],[2048,855],[2048,905],[1114,905]]}]:[];return [...fixed,...SCENERY[map].filter(p=>p.rx>0).map(p=>({name:p.id,points:Array.from({length:12},(_,i)=>[p.x+Math.cos(i*Math.PI/6)*p.width*p.rx,p.y+(p.collisionY||0)*p.width+Math.sin(i*Math.PI/6)*p.width*p.ry])}))];}
+SCENERY.push(
+ [...[480,930,1380].flatMap((y,i)=>[prop('escada-oeste-'+i,'barrier',735,y,125),prop('escada-leste-'+i,'barrier',1310,y,125)]),prop('rocha-escada','rock',780,250,90)],
+ [prop('lava-rocha-1','rock',440,1330,75),prop('lava-rocha-2','rock',1570,930,75),prop('lava-rocha-3','rock',710,410,70)],
+ [...[[300,450],[1748,450],[300,1450],[1748,1450]].map((p,i)=>prop('trono-rocha-'+i,'rock',...p,200))]
+);
+
+export function sceneryObstacles(map){const fixed=map===2?[{name:'Parede selada oeste',points:[[0,855],[934,855],[934,905],[0,905]]},{name:'Parede selada leste',points:[[1114,855],[2048,855],[2048,905],[1114,905]]}]:[];if(map===3)fixed.push({name:'Abismo oeste',points:[[0,0],[660,0],[660,2048],[0,2048]]},{name:'Abismo leste',points:[[1388,0],[2048,0],[2048,2048],[1388,2048]]});return [...fixed,...SCENERY[map].filter(p=>p.rx>0).map(p=>({name:p.id,points:Array.from({length:12},(_,i)=>[p.x+Math.cos(i*Math.PI/6)*p.width*p.rx,p.y+(p.collisionY||0)*p.width+Math.sin(i*Math.PI/6)*p.width*p.ry])}))];}
 export function propBounds(prop,image){const h=prop.width*image.height/image.width;return {x:prop.x-prop.width/2,y:prop.y-h*prop.anchor,width:prop.width,height:h};}
 export function depthOrder(items){return items.slice().sort((a,b)=>a.y-b.y||(a.order||0)-(b.order||0));}
 export function drawProp(ctx,prop,image){const b=propBounds(prop,image);ctx.drawImage(image,b.x,b.y,b.width,b.height);}

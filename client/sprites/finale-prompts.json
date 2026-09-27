@@ -1,0 +1,10 @@
+[
+  {
+    "file": "ground-lava.png",
+    "prompt": "Use case: stylized-concept. Asset: square top-down 2D dark fantasy RPG lava ground texture, painterly pixel art consistent with detailed 16-bit medieval action RPG. Entire image is molten orange-red lava with thin dark cooling crust veins, evenly lit, seamless-feeling continuous surface. True overhead orthographic view. No platforms, no islands, no rocks, no borders, no objects, no monsters, no text, no logos, no perspective horizon. Game will draw safe platforms above this layer. Rich amber light with deep crimson and charcoal, legible restrained detail."
+  },
+  {
+    "file": "titan-topdown.png",
+    "prompt": "Use case: stylized-concept. Asset: single final boss sprite for top-down 2D fantasy RPG. A gigantic ancient obsidian titan with broad shoulders, volcanic armor plates, blazing golden fractured sun embedded in its chest, heavy stone clawed hands and thick legs. Entire body visible, facing screen-bottom, high three-quarter top-down view showing top of head and shoulders, matching 16-bit painterly pixel-art game sprites. Compact readable silhouette, strong warm rim lighting, fierce but not gory. Centered, fills canvas, feet near bottom, no weapon extending outside silhouette, no floor, no shadow outside body, no text, no border, no logos. Genuine transparent background."
+  }
+]

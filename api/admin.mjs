@@ -6,10 +6,10 @@ export function installAdmin(app,{directory,onApply}){
  fs.mkdirSync(directory,{recursive:true});const filename=path.join(directory,'world-settings.json');
  if(fs.existsSync(filename)){
   const saved=JSON.parse(fs.readFileSync(filename,'utf8'));
-  if(saved.version<3){
-   fs.copyFileSync(filename,filename+(saved.version===1?'.before-layers.bak':'.before-dungeon.bak'));
-   saved.maps=DEFAULT_SETTINGS.maps.map(base=>{const old=saved.version===2?saved.maps.find(m=>m.id===base.id):null;return old?{id:base.id,obstacles:[...old.obstacles,...base.obstacles.filter(o=>!old.obstacles.some(p=>p.name===o.name))]}:base;});
-   saved.enemies={...DEFAULT_SETTINGS.enemies,...saved.enemies};saved.version=3;saved.revision=Date.now();fs.writeFileSync(filename,JSON.stringify(saved,null,2));
+  if(saved.version<4){
+   fs.copyFileSync(filename,filename+(saved.version===1?'.before-layers.bak':saved.version===2?'.before-dungeon.bak':'.before-finale.bak'));
+   saved.maps=DEFAULT_SETTINGS.maps.map(base=>{const old=saved.version>=2?saved.maps.find(m=>m.id===base.id):null;return old?saved.version>=3?old:{id:base.id,obstacles:[...old.obstacles,...base.obstacles.filter(o=>!old.obstacles.some(p=>p.name===o.name))]}:base;});
+   saved.enemies={...DEFAULT_SETTINGS.enemies,...saved.enemies};saved.version=4;saved.revision=Date.now();fs.writeFileSync(filename,JSON.stringify(saved,null,2));
   }
   applySettings(saved);
  }

@@ -8,11 +8,11 @@ export const hashToken=token=>createHash('sha256').update(token).digest('hex');
 export function playerRecord(p){return {character:p.character,map:p.map,x:p.x,y:p.y,hp:p.hp,kills:p.kills,checkpointMap:p.checkpointMap,equipment:p.equipment,energy:p.energy,name:String(p.name||'Viajante').slice(0,24)};}
 export function captureRoom(room,key){
  for(const [id,hash] of Object.entries(room.identities))if(room.world.players[id])room.profiles[hash]=playerRecord(room.world.players[id]);
- return {version:2,kind:'multiplayer',room:key,updatedAt:new Date().toISOString(),hostHash:room.hostHash,profiles:room.profiles,campfires:room.world.campfires,puzzle:room.world.puzzle,enemies:room.world.enemies.map(e=>({id:e.id,hp:e.hp}))};
+ return {version:3,kind:'multiplayer',room:key,updatedAt:new Date().toISOString(),hostHash:room.hostHash,profiles:room.profiles,campfires:room.world.campfires,puzzle:room.world.puzzle,enemies:room.world.enemies.map(e=>({id:e.id,hp:e.hp}))};
 }
 export function restoreRoom(data){
- if(!data||![1,2].includes(data.version)||data.kind!=='multiplayer'||!Array.isArray(data.enemies)||!data.profiles||typeof data.profiles!=='object'||Array.isArray(data.profiles)||Object.keys(data.profiles).length>256||typeof data.hostHash!=='string'||!/^[a-f0-9]{64}$/.test(data.hostHash))throw new Error('Save multiplayer inválido.');
- const expected=data.version===1?ENEMY_SPAWNS.filter(e=>e.map<2):ENEMY_SPAWNS;
+ if(!data||![1,2,3].includes(data.version)||data.kind!=='multiplayer'||!Array.isArray(data.enemies)||!data.profiles||typeof data.profiles!=='object'||Array.isArray(data.profiles)||Object.keys(data.profiles).length>256||typeof data.hostHash!=='string'||!/^[a-f0-9]{64}$/.test(data.hostHash))throw new Error('Save multiplayer inválido.');
+ const expected=data.version===1?ENEMY_SPAWNS.filter(e=>e.map<2):data.version===2?ENEMY_SPAWNS.filter(e=>e.map<3):ENEMY_SPAWNS;
  if(data.enemies.length!==expected.length||new Set(data.enemies.map(e=>e?.id)).size!==expected.length||!expected.every(e=>data.enemies.some(item=>item?.id===e.id&&Number.isFinite(item.hp))))throw new Error('Lista de inimigos incompleta no save.');
  const base=decodeSave(JSON.stringify({version:1,player:{},campfires:data.campfires,puzzle:data.puzzle,enemies:data.enemies}));if(!base)throw new Error('Save multiplayer inválido.');
  base.players={};const profiles=Object.create(null);

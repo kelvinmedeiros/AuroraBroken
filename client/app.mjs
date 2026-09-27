@@ -1,4 +1,7 @@
 import {t,setText,locale,readLanguage,setLanguage,bindLanguageUI} from './i18n.mjs';
+import {drawTerrain,inLava} from './terrain.mjs';
+import {portalLocked} from './world.mjs';
+import {titanAttackArea} from './engine.mjs';
 import {SLOTS,WEAPONS,ARMOR_SETS,normalizeGear,equipmentStats,unlockTier,equip} from './equipment.mjs';
 import {migrateStorage} from './storage-migration.mjs';
 import {PROP_TYPES,drawProp,depthOrder} from './scenery.mjs';
@@ -164,7 +167,7 @@ function journal(){
  if(!world)return;
  if($('journal').open){$('journal').close();canvas.focus();return;}
  clearInput();setText($('journalQuest'),objective(world));
- const lore={hollow:'Antigos vigias, presos ao último juramento. Aproximam-se e anunciam um golpe curto.',ember:'Alimentou-se da luz roubada. Sua explosão é lenta, mas alcança uma área maior.',seer:'Viu o futuro do rei e perdeu a própria sombra. Marca o chão antes de conjurar uma explosão.',shade:'Almas presas à cripta. Invocam marcas de gelo sob seus pés.',warden:'Protege a primeira brasa na câmara selada. Resolva as runas para enfrentá-lo.',malenio:'O guardião que confundiu amor com prisão. Abaixo de meia vida, entra em fúria: seus golpes ficam mais rápidos e amplos.'};
+ const lore={titan:'Asterion devorou o coração do Sol. Seus pisões atingem perto; a erupção marca seus pés; a onda solar deixa o centro seguro. Abaixo de meia vida, seus ataques ficam maiores e mais rápidos.',hollow:'Antigos vigias, presos ao último juramento. Aproximam-se e anunciam um golpe curto.',ember:'Alimentou-se da luz roubada. Sua explosão é lenta, mas alcança uma área maior.',seer:'Viu o futuro do rei e perdeu a própria sombra. Marca o chão antes de conjurar uma explosão.',shade:'Almas presas à cripta. Invocam marcas de gelo sob seus pés.',warden:'Protege a primeira brasa na câmara selada. Resolva as runas para enfrentá-lo.',malenio:'O guardião que confundiu amor com prisão. Abaixo de meia vida, entra em fúria: seus golpes ficam mais rápidos e amplos.'};
  $('bestiary').replaceChildren();for(const [type,info] of Object.entries(ENEMY_TYPES)){
   const block=document.createElement('p');block.className='bestiary-entry';const title=document.createElement('strong');setText(title,info.name);block.append(title,document.createElement('br'),document.createTextNode(t(lore[type])));$('bestiary').append(block);
  }$('journal').showModal();
@@ -212,7 +215,7 @@ function drawEquipped(target,p,time){
 }
 function drawEnemy(e,time){
  if(e.hp<=0){circle(e.x,e.y,8,'#d4b06766');return;}
- const image=assets[e.type],h={hollow:80,ember:86,seer:86,malenio:112,shade:82,warden:120}[e.type],w=h*image.width/image.height;
+ const image=assets[e.type],h={hollow:80,ember:86,seer:86,malenio:112,shade:82,warden:120,titan:420}[e.type],w=h*image.width/image.height;
  ctx.save();ctx.translate(e.x,e.y);ctx.fillStyle='#05080555';ctx.beginPath();ctx.ellipse(0,2,e.type==='malenio'?29:19,7,0,0,7);ctx.fill();
  if(e.flash>0)ctx.filter='brightness(1.8)';
  const bob=e.type==='seer'?Math.sin(time*3+e.homeX)*3:e.state==='chase'?Math.sin(time*10)*1.5:0;
@@ -222,7 +225,7 @@ function drawEnemy(e,time){
 }
 function drawMapOverlay(p){
  const s=Math.min(width-48,height-170,600),x=(width-s)/2,y=(height-s)/2;
- ctx.fillStyle='#101912ee';ctx.fillRect(x-15,y-45,s+30,s+95);ctx.drawImage(assets['map'+p.map],x,y,s,s);ctx.save();ctx.translate(x,y);ctx.scale(s/SIZE,s/SIZE);for(const prop of depthOrder(MAPS[p.map].props))drawProp(ctx,prop,assets[prop.type]);ctx.restore();
+ ctx.fillStyle='#101912ee';ctx.fillRect(x-15,y-45,s+30,s+95);ctx.drawImage(assets['map'+p.map],x,y,s,s);ctx.save();ctx.translate(x,y);ctx.scale(s/SIZE,s/SIZE);drawTerrain(ctx,p.map,world.time,assets.map2);for(const prop of depthOrder(MAPS[p.map].props))drawProp(ctx,prop,assets[prop.type]);ctx.restore();
  const project=a=>({x:x+a.x/SIZE*s,y:y+a.y/SIZE*s});
  for(const e of world.enemies.filter(e=>e.map===p.map&&e.hp>0)){const q=project(e);circle(q.x,q.y,5,e.color,'#241911');}
  for(const a of [MAPS[p.map].camp,...portalsOf(p.map),...(p.map===2?RUNES:[])]){const q=project(a);circle(q.x,q.y,6,'#e7cc87','#172219');}
@@ -237,11 +240,12 @@ function render(){
  const cameraY=viewH>=SIZE?(SIZE-viewH)/2:Math.max(0,Math.min(SIZE-viewH,p.y-viewH/2));
  ctx.save();ctx.scale(zoom,zoom);ctx.translate(-cameraX,-cameraY);ctx.imageSmoothingEnabled=false;
  ctx.drawImage(assets['map'+p.map],0,0,SIZE,SIZE);
+ drawTerrain(ctx,p.map,time,assets.map2);
  for(const prop of m.props){if(prop.ground)drawProp(ctx,prop,assets[prop.type]);else if(prop.shadow){ctx.save();ctx.fillStyle='#10130e30';ctx.beginPath();ctx.ellipse(prop.x,prop.y,prop.width*prop.shadow,prop.width*.065,0,0,Math.PI*2);ctx.fill();ctx.restore();}}
  // Checkpoint and portals sit on verified walkable ground.
  const lit=world.campfires?.[p.map],fire=lit?assets.fireLit:assets.fireUnlit;if(lit)circle(m.camp.x,m.camp.y,32,'#e8a04e22');ctx.save();ctx.imageSmoothingEnabled=true;const fireW=64,fireH=fireW*fire.height/fire.width;ctx.drawImage(fire,m.camp.x-fireW/2,m.camp.y-fireH/2,fireW,fireH);ctx.restore();label(lit?'Fogueira acesa':'Fogueira apagada',m.camp.x,m.camp.y+42,'#ffe2a4');
  for(const portal of portalsOf(p.map)){
-  const locked=p.map===0&&world.enemies.some(e=>e.map===0&&e.hp>0)||portal.requires&&world.enemies.some(e=>e.type===portal.requires&&e.hp>0);
+  const locked=portalLocked(world,p.map,portal);
   ctx.lineWidth=3;circle(portal.x,portal.y,portal.r*.68+Math.sin(time*2)*3,locked?'#5b447044':'#e3be7033',locked?'#a99ab6':'#ffe09c');label(locked?'Selo fechado':portal.label,portal.x,portal.y+65,locked?'#d4c7dc':'#ffe3a3');
  }
  if(p.map===2){
@@ -250,6 +254,7 @@ function render(){
   if(!world.puzzle.solved){ctx.fillStyle='#263246';ctx.fillRect(GATE.x-90,GATE.y-25,180,50);ctx.strokeStyle='#cfb987';ctx.lineWidth=5;for(let x=GATE.x-85;x<GATE.x+90;x+=20){ctx.beginPath();ctx.moveTo(x,GATE.y-50);ctx.lineTo(x,GATE.y+25);ctx.stroke();}label('Selo das três runas',GATE.x,GATE.y-65);}
  }
  for(const e of world.enemies.filter(e=>e.map===p.map&&e.hp>0&&e.state==='windup')){
+  if(e.type==='titan'){const a=titanAttackArea(e);ctx.save();ctx.fillStyle='#fa713c44';ctx.strokeStyle='#ffe6a1';ctx.lineWidth=4;ctx.beginPath();ctx.arc(a.x,a.y,a.outer,0,Math.PI*2);if(a.inner)ctx.arc(a.x,a.y,a.inner,0,Math.PI*2,true);ctx.fill('evenodd');ctx.stroke();label(['PISÃO','ERUPÇÃO','ONDA SOLAR'][e.attackPattern],a.x,a.y-a.outer-15,'#ffe3ab',18);ctx.restore();continue;}
   const seer=['seer','shade'].includes(e.type),x=seer?e.aimX:e.x,y=seer?e.aimY:e.y,r=seer?72:e.range*(['malenio','warden'].includes(e.type)&&e.hp<e.maxHp/2?1.2:1);
   circle(x,y,r,'#dc624533','#ffc288');circle(x,y,r*Math.max(0,1-e.timer/e.windup),'#df5c4a33');label('!',x,y-10,'#fff0cb',24);
  }
@@ -262,7 +267,8 @@ function render(){
  for(const shot of world.projectiles.filter(s=>s.map===p.map)){circle(shot.x,shot.y-12,8,shot.color,'#fff3ce');ctx.strokeStyle=shot.color;ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(shot.x,shot.y-12);ctx.lineTo(shot.x-shot.dx*26,shot.y-12-shot.dy*26);ctx.stroke();}
  for(const effect of world.effects.filter(e=>e.map===p.map)){
   ctx.save();ctx.globalAlpha=Math.min(1,effect.life*5);
-  if(effect.kind==='number')label(effect.text,effect.x,effect.y-(.7-effect.life)*38,effect.color,20);
+  if(effect.kind==='shockwave'){ctx.strokeStyle=effect.color;ctx.lineWidth=10;ctx.beginPath();ctx.arc(effect.x,effect.y,effect.outer,0,Math.PI*2);ctx.stroke();if(effect.inner)circle(effect.x,effect.y,effect.inner,null,effect.color);}
+  else if(effect.kind==='number')label(effect.text,effect.x,effect.y-(.7-effect.life)*38,effect.color,20);
   else if(effect.kind==='burst')circle(effect.x,effect.y,effect.range*(1.2-effect.life),'#e19b4b33',effect.color);
   else{ctx.strokeStyle=effect.color;ctx.lineWidth=7;ctx.beginPath();ctx.arc(effect.x,effect.y,effect.range*.85,effect.angle-.95,effect.angle+.95);ctx.stroke();}
   ctx.restore();
@@ -276,12 +282,12 @@ function updateHud(){
  setText($('network'),mode==='solo'?'Solo':onlineError?'Desconectado':`Sala ${$('room').value.toUpperCase()} · ${Object.keys(world.players).length}/4`);
  $('saveStatus').hidden=mode==='online';setText($('dashStatus'),p.dashCd>0?p.dashCd.toFixed(1)+'s':'pronta');
  const message=onlineError||roomSaveError||(p.messageTime>0?p.message:'');$('toast').hidden=!message||!$('menu').hidden;setText($('toast'),message);
- let prompt='';const nearPortal=portalsOf(p.map).find(a=>Math.hypot(p.x-a.x,p.y-a.y)<a.r+RADIUS);if(nearPortal)prompt='E · '+nearPortal.label;
+ let prompt=inLava(p.map,p.x,p.y)?'Lava! Volte para as plataformas de pedra.':'';const nearPortal=portalsOf(p.map).find(a=>Math.hypot(p.x-a.x,p.y-a.y)<a.r+RADIUS);if(nearPortal)prompt='E · '+nearPortal.label;
  else if(Math.hypot(p.x-m.camp.x,p.y-m.camp.y)<95)prompt=world.campfires?.[p.map]?'E · Descansar na fogueira':'E · Acender fogueira';
  if(p.map===2){const rune=RUNES.find(r=>Math.hypot(p.x-r.x,p.y-r.y)<85);if(rune)prompt='E · Ativar '+rune.label;if(Math.hypot(p.x-INSCRIPTION.x,p.y-INSCRIPTION.y)<85)prompt='E · Ler inscrição';}
  setText($('combatStatus'),`Energia ${Math.floor(p.energy??100)} · Q ${p.specialCd>0?p.specialCd.toFixed(1)+'s':'pronto'} · F ${p.rangedCd>0?p.rangedCd.toFixed(1)+'s':'pronto'}`);
  $('interaction').hidden=!prompt||p.hp<=0||!$('menu').hidden;setText($('interaction'),prompt);
- const boss=world.enemies.find(e=>e.type===(p.map===2?'warden':'malenio'));setText($('bossName'),boss.name);$('bossHud').hidden=![1,2].includes(p.map)||boss.hp<=0||!!prompt||!$('menu').hidden;
+ const boss=world.enemies.find(e=>e.type===(p.map===5?'titan':p.map===2?'warden':'malenio'));setText($('bossName'),boss.name);$('bossHud').hidden=![1,2,5].includes(p.map)||boss.hp<=0||!!prompt||!$('menu').hidden;
  $('bossFill').style.width=boss.hp/boss.maxHp*100+'%';
  if(p.hp<=0&&$('menu').hidden&&!$('death').open&&!modalOpen())$('death').showModal();
  if(p.hp>0&&$('death').open)$('death').close();

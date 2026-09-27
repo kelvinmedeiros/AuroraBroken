@@ -5,6 +5,15 @@ export function readLanguage(storage){try{return storage.getItem(LANGUAGE_KEY)==
 let language='pt-BR';
 export const locale=()=>language==='en'?'en-US':'pt-BR';
 export const EN={
+ 'Escadaria dos Condenados':'Stairway of the Condemned','Fornalha das Pontes Partidas':'Furnace of Broken Bridges','Trono do Sol Devorado':'Throne of the Devoured Sun',
+ 'Subir a escadaria':'Climb the stairway','Voltar à cripta':'Return to the crypt','Entrar na fornalha':'Enter the furnace','Voltar à escadaria':'Return to the stairway','Entrar no trono':'Enter the throne','Voltar à fornalha':'Return to the furnace',
+ 'Asterion, o Devorador do Sol':'Asterion, the Sun Devourer','Asterion cai. O Sol renasce, e a aurora enfim pertence ao reino.':'Asterion falls. The Sun is reborn, and dawn finally belongs to the kingdom.',
+ 'O Custódio cai. A escadaria se abre. Asterion ainda aprisiona o coração do Sol.':'The Warden falls. The stairway opens. Asterion still holds the heart of the Sun captive.',
+ 'Suba a escadaria • Derrote os monstros dos degraus':'Climb the stairway • Defeat its monsters','Atravesse a fornalha • Fique nas plataformas e derrote os guardiões':'Cross the furnace • Stay on platforms and defeat the guardians','O último eclipse • Derrote Asterion no trono':'The final eclipse • Defeat Asterion at the throne',
+ 'Derrote o Custódio para abrir a escadaria.':'Defeat the Warden to open the stairway.','Derrote os monstros desta área para abrir a passagem.':'Defeat this area’s monsters to open the passage.','Lava! Volte para as plataformas de pedra.':'Lava! Return to the stone platforms.',
+ 'PISÃO':'STOMP','ERUPÇÃO':'ERUPTION','ONDA SOLAR':'SOLAR WAVE',
+ 'Asterion devorou o coração do Sol. Seus pisões atingem perto; a erupção marca seus pés; a onda solar deixa o centro seguro. Abaixo de meia vida, seus ataques ficam maiores e mais rápidos.':'Asterion devoured the heart of the Sun. His stomp hits nearby; eruption marks your feet; the solar wave leaves a safe center. Below half health, his attacks become wider and faster.',
+ 'Asterion se desfaz em estrelas. Após a cripta, a escadaria e a fornalha, o coração do Sol está livre. A aurora ilumina o reino inteiro.':'Asterion dissolves into stars. Beyond the crypt, stairway and furnace, the heart of the Sun is free. Dawn illuminates the entire kingdom.',
  'Jornada':'Journey','Fogueira':'Bonfire','Portal':'Portal',
  'Este perfil já está conectado. Use outro nome para jogar em outra aba.':'This profile is already connected. Use another name to play in another tab.',
  'Limite de perfis desta sala atingido. Crie outra sala.':'This room has reached its profile limit. Create another room.',

@@ -1,4 +1,5 @@
 import {defaultGear,equipmentStats} from './equipment.mjs';
+import {inLava} from './terrain.mjs';
 import {MAPS,ENEMY_TYPES,ENEMY_SPAWNS,RADIUS,move,blocked,lineClear,safePoint,portalsOf,RUNES,RUNE_ORDER,INSCRIPTION,GATE} from './world.mjs';
 import {TUNING} from './settings.mjs';
 export const STEP=1/60;
@@ -13,22 +14,25 @@ export function objective(w){
  if(w.won)return 'A aurora voltou • Jornada concluída';
  if(w.enemies.some(e=>e.type==='malenio'&&e.hp>0))return 'Derrote Malênio na Cidadela';
  if(!w.puzzle.solved)return `Entre no castelo • Resolva as runas (${w.puzzle.progress}/3)`;
- return 'O selo abriu • Derrote o Custódio na câmara norte';
+ if(w.enemies.some(e=>e.type==='warden'&&e.hp>0))return 'O selo abriu • Derrote o Custódio na câmara norte';
+ if(w.enemies.some(e=>e.map===3&&e.hp>0))return 'Suba a escadaria • Derrote os monstros dos degraus';
+ if(w.enemies.some(e=>e.map===4&&e.hp>0))return 'Atravesse a fornalha • Fique nas plataformas e derrote os guardiões';
+ return 'O último eclipse • Derrote Asterion no trono';
 }
 export function worldBlocked(w,map,x,y,r=RADIUS){return blocked(map,x,y,r)||(map===2&&!w.puzzle.solved&&Math.abs(x-GATE.x)<GATE.halfWidth+r&&Math.abs(y-GATE.y)<GATE.halfHeight+r);}
 export function moveInWorld(w,actor,dx,dy,r=RADIUS){const steps=Math.max(1,Math.ceil(Math.hypot(dx,dy)/6));for(let i=0;i<steps;i++){if(!worldBlocked(w,actor.map,actor.x+dx/steps,actor.y,r))actor.x+=dx/steps;if(!worldBlocked(w,actor.map,actor.x,actor.y+dy/steps,r))actor.y+=dy/steps;}}
 export function lineOfSight(w,map,a,b){const steps=Math.ceil(Math.hypot(b.x-a.x,b.y-a.y)/6);for(let i=1;i<steps;i++)if(worldBlocked(w,map,a.x+(b.x-a.x)*i/steps,a.y+(b.y-a.y)*i/steps,2))return false;return true;}
 const tell=(p,text)=>{p.message=text;p.messageTime=5;};
-function damagePlayer(w,p,damage){
- if(p.hp<=0||p.invuln>0)return;
- damage=Math.max(1,Math.round(damage*(1-equipmentStats(p).defense/100)));p.hp=Math.max(0,p.hp-damage);p.invuln=.75;
+function damagePlayer(w,p,damage,environment=false){
+ if(p.hp<=0||!environment&&p.invuln>0)return;
+ damage=Math.max(1,Math.round(damage*(environment?1:1-equipmentStats(p).defense/100)));p.hp=Math.max(0,p.hp-damage);if(!environment)p.invuln=.75;
  w.effects.push({kind:'number',x:p.x,y:p.y-65,text:`−${damage}`,color:'#ff8e84',life:.7,map:p.map});
  if(p.hp===0){p.moving=false;tell(p,'Sua brasa ainda vive. Pressione R para voltar à fogueira.');}
 }
 function hitEnemy(w,p,e,damage){
  if(e.hp<=0)return;e.hp=Math.max(0,e.hp-Math.round(damage));e.flash=.15;
  w.effects.push({kind:'number',x:e.x,y:e.y-80,text:String(Math.round(damage)),color:'#fff3cd',life:.65,map:e.map});
- if(e.hp===0){e.state='dead';if(p){p.kills++;p.hp=Math.min(100,p.hp+15);tell(p,e.reward);}if(e.type==='warden'&&w.puzzle.solved)w.won=true;if(['malenio','warden'].includes(e.type))for(const ally of Object.values(w.players))tell(ally,e.reward);}
+ if(e.hp===0){e.state='dead';if(p){p.kills++;p.hp=Math.min(100,p.hp+15);tell(p,e.reward);}if(e.type==='titan'&&w.puzzle.solved)w.won=true;if(['malenio','warden','titan'].includes(e.type))for(const ally of Object.values(w.players))tell(ally,e.reward);}
 }
 export function attack(w,p,kind='normal'){
  if(p.hp<=0||p.attackCd>0||p.dashTime>0)return false;
@@ -40,7 +44,7 @@ export function attack(w,p,kind='normal'){
  if(special){p.energy-=30;p.specialCd=4;p.attackCd=.75;multiplier=2;range=weapon.style==='thrust'?330:weapon.style==='beam'?400:weapon.range+70;arc=['thrust','beam'].includes(weapon.style)?.92:-1;}
  else p.attackCd=weapon.cooldown;
  w.effects.push({kind:special&&arc===-1?'burst':'slash',x:p.x,y:p.y,angle:Math.atan2(p.facingY,p.facingX),range,life:special?.4:.18,map:p.map,color:weapon.color});
- for(const e of w.enemies){if(e.hp<=0||e.map!==p.map)continue;const dx=e.x-p.x,dy=e.y-p.y,d=Math.hypot(dx,dy),dot=(dx*p.facingX+dy*p.facingY)/(d||1);if(d>range+18||dot<arc||!lineOfSight(w,p.map,p,e))continue;hitEnemy(w,p,e,damage*multiplier);if(special)e.slow=2;}
+ for(const e of w.enemies){if(e.hp<=0||e.map!==p.map)continue;const dx=e.x-p.x,dy=e.y-p.y,d=Math.hypot(dx,dy),dot=(dx*p.facingX+dy*p.facingY)/(d||1);if(d>range+(e.radius||18)||dot<arc||!lineOfSight(w,p.map,p,e))continue;hitEnemy(w,p,e,damage*multiplier);if(special)e.slow=2;}
  return true;
 }
 export function interact(w,p){
@@ -48,7 +52,8 @@ export function interact(w,p){
  const m=MAPS[p.map];
  for(const portal of portalsOf(p.map)){
  if(Math.hypot(p.x-portal.x,p.y-portal.y)<portal.r+RADIUS){
-  if(portal.requires&&w.enemies.some(e=>e.type===portal.requires&&e.hp>0)){tell(p,'A entrada está selada. Derrote Malênio.');return false;}
+  if(portal.requires&&w.enemies.some(e=>e.type===portal.requires&&e.hp>0)){tell(p,portal.requires==='warden'?'Derrote o Custódio para abrir a escadaria.':'A entrada está selada. Derrote Malênio.');return false;}
+  if(portal.requiresClear&&w.enemies.some(e=>e.map===p.map&&e.hp>0)){tell(p,'Derrote os monstros desta área para abrir a passagem.');return false;}
   if(p.map===0&&w.enemies.some(e=>e.map===0&&e.hp>0)){tell(p,'O selo exige a queda dos três guardiões do Jardim.');return false;}
   p.map=portal.to;Object.assign(p,safePoint(p.map,portal.destination));p.portalCd=1;p.invuln=1;p.moving=false;p.dashTime=0;
   tell(p,MAPS[p.map].name);return true;
@@ -92,6 +97,8 @@ function tickPlayer(w,p,input,dt){
  if(p.dashTime>0){moveInWorld(w,p,p.dashX*620*dt,p.dashY*620*dt);p.dashTime=Math.max(0,p.dashTime-dt);}
  else moveInWorld(w,p,dx*TUNING.playerSpeed*dt,dy*TUNING.playerSpeed*dt);
  p.moving=Math.hypot(p.x-oldX,p.y-oldY)>.01;
+ p.lavaCd=Math.max(0,(p.lavaCd||0)-dt);
+ if(inLava(p.map,p.x,p.y)&&p.lavaCd===0){damagePlayer(w,p,18,true);p.lavaCd=.7;if(p.hp>0)tell(p,'Lava! Volte para as plataformas de pedra.');}
  if(input.special)attack(w,p,'special');else if(input.ranged)attack(w,p,'ranged');else if(input.attack)attack(w,p);
  if(input.interact)interact(w,p);
 }
@@ -101,6 +108,7 @@ function tickEnemy(w,e,dt){
  if(!targets.length){e.state='idle';e.timer=0;return;}
  const p=targets.reduce((a,b)=>Math.hypot(a.x-e.x,a.y-e.y)<Math.hypot(b.x-e.x,b.y-e.y)?a:b);
  e.timer=Math.max(0,e.timer-dt);
+ if(e.type==='titan'){tickTitan(w,e,p,targets,dt);return;}
  const enraged=['malenio','warden'].includes(e.type)&&e.hp<e.maxHp/2;
  if(e.state==='windup'){
   if(e.timer===0){
@@ -135,11 +143,29 @@ function tickEnemy(w,e,dt){
   }
  }
 }
+export function titanAttackArea(e){
+ const rage=e.hp<e.maxHp/2,scale=e.range/230;
+ return e.attackPattern===1?{x:e.aimX,y:e.aimY,outer:(rage?145:115)*scale,inner:0}:e.attackPattern===2?{x:e.x,y:e.y,outer:(rage?440:380)*scale,inner:170*scale}:{x:e.x,y:e.y,outer:(rage?290:240)*scale,inner:0};
+}
+function tickTitan(w,e,p,targets,dt){
+ const rage=e.hp<e.maxHp/2;
+ if(e.state==='windup'){
+  if(e.timer===0){const area=titanAttackArea(e);w.effects.push({kind:'shockwave',...area,map:e.map,color:e.color,life:.5});
+   for(const target of targets){const d=Math.hypot(target.x-area.x,target.y-area.y);if(d<area.outer+RADIUS&&d>=Math.max(0,area.inner-RADIUS)&&lineOfSight(w,e.map,e,target))damagePlayer(w,target,e.damage);}
+   e.state='recover';e.timer=e.cooldown*(rage?.75:1);e.cycle=((e.cycle||0)+1)%3;
+  }return;
+ }
+ if(e.state==='recover'){if(e.timer===0)e.state='idle';return;}
+ const dx=p.x-e.x,dy=p.y-e.y,d=Math.hypot(dx,dy),camp=MAPS[e.map].camp;
+ if(d>TUNING.aggroRange*2.5||w.campfires[e.map]&&Math.hypot(p.x-camp.x,p.y-camp.y)<130){e.state='idle';return;}
+ if(d>Math.max(150,420*e.range/230)){e.state='chase';moveInWorld(w,e,dx/d*e.speed*dt,dy/d*e.speed*dt,e.radius);return;}
+ e.attackPattern=e.cycle||0;e.aimX=p.x;e.aimY=p.y;e.state='windup';e.timer=e.windup*(rage?.85:1);
+}
 export function tick(w,inputs={},dt=STEP){
  dt=Math.max(0,Math.min(dt,.05));w.time+=dt;
  w.effects=w.effects.filter(e=>(e.life-=dt)>0);
  for(const p of Object.values(w.players))tickPlayer(w,p,inputs[p.id]||{},dt);
  for(const e of w.enemies)tickEnemy(w,e,dt);
- for(const shot of w.projectiles){shot.life-=dt;const steps=Math.ceil(480*dt/6);for(let i=0;i<steps&&shot.life>0;i++){shot.x+=shot.dx*480*dt/steps;shot.y+=shot.dy*480*dt/steps;if(worldBlocked(w,shot.map,shot.x,shot.y,5)){shot.life=0;break;}for(const e of w.enemies)if(e.map===shot.map&&e.hp>0&&!shot.hits.includes(e.id)&&Math.hypot(e.x-shot.x,e.y-shot.y)<25){shot.hits.push(e.id);hitEnemy(w,w.players[shot.owner],e,shot.damage);}}}
+ for(const shot of w.projectiles){shot.life-=dt;const steps=Math.ceil(480*dt/6);for(let i=0;i<steps&&shot.life>0;i++){shot.x+=shot.dx*480*dt/steps;shot.y+=shot.dy*480*dt/steps;if(worldBlocked(w,shot.map,shot.x,shot.y,5)){shot.life=0;break;}for(const e of w.enemies)if(e.map===shot.map&&e.hp>0&&!shot.hits.includes(e.id)&&Math.hypot(e.x-shot.x,e.y-shot.y)<(e.radius||25)){shot.hits.push(e.id);hitEnemy(w,w.players[shot.owner],e,shot.damage);}}}
  w.projectiles=w.projectiles.filter(s=>s.life>0);
 }

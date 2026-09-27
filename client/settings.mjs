@@ -1,6 +1,6 @@
 import {MAPS,ENEMY_TYPES,ENEMY_SPAWNS,SIZE,blocked,portalsOf,RUNES,INSCRIPTION} from './world.mjs';
 const copy=value=>JSON.parse(JSON.stringify(value));
-export const DEFAULT_SETTINGS={version:3,revision:0,maps:MAPS.map(m=>({id:m.id,obstacles:copy(m.obstacles)})),enemies:copy(ENEMY_TYPES),tuning:{playerSpeed:225,playerDamage:1,aggroRange:440}};
+export const DEFAULT_SETTINGS={version:4,revision:0,maps:MAPS.map(m=>({id:m.id,obstacles:copy(m.obstacles)})),enemies:copy(ENEMY_TYPES),tuning:{playerSpeed:225,playerDamage:1,aggroRange:440}};
 export const TUNING={...DEFAULT_SETTINGS.tuning};
 let active=copy(DEFAULT_SETTINGS);
 export const getSettings=()=>copy(active);
@@ -9,7 +9,7 @@ const number=(v,min,max,label)=>{if(!Number.isFinite(v)||v<min||v>max)throw new 
 function cross(a,b,c){return (b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]);}
 function intersects(a,b,c,d){return cross(a,b,c)*cross(a,b,d)<0&&cross(c,d,a)*cross(c,d,b)<0;}
 export function validateSettings(input){
- if(!input||input.version!==3||!Array.isArray(input.maps)||input.maps.length!==MAPS.length)throw new Error('Configuração inválida ou versão incompatível.');
+ if(!input||input.version!==4||!Array.isArray(input.maps)||input.maps.length!==MAPS.length)throw new Error('Configuração inválida ou versão incompatível.');
  const out=copy(DEFAULT_SETTINGS);out.revision=Number.isFinite(input.revision)?input.revision:0;
  out.maps=DEFAULT_SETTINGS.maps.map(base=>{
   const map=input.maps.find(m=>m?.id===base.id);if(!map||!Array.isArray(map.obstacles)||map.obstacles.length>300)throw new Error('Mapa inválido: máximo de 300 polígonos.');
