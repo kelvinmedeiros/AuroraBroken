@@ -50,7 +50,7 @@ export function attack(w,p,kind='normal'){
 export function interact(w,p){
  if(p.hp<=0||p.portalCd>0)return false;
  const m=MAPS[p.map];
- for(const portal of portalsOf(p.map)){
+ for(const portal of (Number.isInteger(w.testMap)?[]:portalsOf(p.map))){
  if(Math.hypot(p.x-portal.x,p.y-portal.y)<portal.r+RADIUS){
   if(portal.requires&&w.enemies.some(e=>e.type===portal.requires&&e.hp>0)){tell(p,portal.requires==='warden'?'Derrote o Custódio para abrir a escadaria.':'A entrada está selada. Derrote Malênio.');return false;}
   if(portal.requiresClear&&w.enemies.some(e=>e.map===p.map&&e.hp>0)){tell(p,'Derrote os monstros desta área para abrir a passagem.');return false;}

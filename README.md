@@ -175,3 +175,9 @@ Legacy scenery settings migrate once to the layered collision footprints, preser
 Older solo saves and multiplayer identities are copied to the current browser keys without deleting the originals; concurrent campaigns are reconciled by update time. Old campaigns retain defeated guardians and receive the seven crypt enemies. Final victory requires the solved puzzle and defeated Asterion. Defeating the Warden now unlocks the stairway. Existing bonfires remain lit; the new crypt bonfire starts unlit.
 
 `npm test` covers attack range and direction, dodging, collision geometry and reachability, portals, bosses, real Socket.IO rooms, separate saves, server restarts, bonfires, admin access and revision control, depth ordering, canopy traversal, castle entry, runes, the dungeon seal, all six weapons, energy costs, armor defense, save migration and localization.
+
+### Collision editing and isolated stage tests
+
+Open `http://localhost:3000/admin.html` on the server PC. Click a collision edge or its interior to select it; drag a vertex to reshape it or drag the interior to move the entire polygon. Alt-click cycles overlapping collisions. Double-click an edge to insert a vertex; use the X/Y fields or **Remove point** for precise edits. Zoom up to 300% and scroll the map; hold Alt while dragging to bypass grid snapping. Each drag is one undo step.
+
+Select any of the six maps and a character, then click **Jogar esta fase**. A separate tab runs the selected map using the editor's current unpublished settings. The test does not save campaign progress, disables map portals, and respawns within the selected stage. **Reiniciar fase** restores all enemies and the stage's puzzle. The crypt puzzle remains playable. Close the test tab to return to the original editor with its draft intact. Only **Salvar e aplicar** publishes changes to regular games. The admin/test launcher requires the local server and is not included in GitHub Pages.

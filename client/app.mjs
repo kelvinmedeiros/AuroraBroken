@@ -1,3 +1,4 @@
+import {createStageTest} from './stage-test.mjs';
 import {t,setText,locale,readLanguage,setLanguage,bindLanguageUI} from './i18n.mjs';
 import {drawTerrain,inLava} from './terrain.mjs';
 import {portalLocked} from './world.mjs';
@@ -16,6 +17,8 @@ const $=id=>document.getElementById(id),canvas=$('gameCanvas'),ctx=canvas.getCon
 let width=innerWidth,height=innerHeight,dpr=1,world=null,id='solo',mode='solo',character='warrior',socket=null;
 let input={},mapOpen=false,debug=false,victorySeen=false,accumulator=0,last=performance.now(),lastSend=0,lastSave=0,lastHud=0,onlineError='',joining=false;
 const assets={};
+let stageTest=null;
+if(typeof __PAGES__==='undefined'){const key=new URLSearchParams(location.search).get('testSession');if(key?.startsWith('aurora-admin-test-')){try{stageTest=JSON.parse(localStorage.getItem(key));if(!Number.isInteger(stageTest?.map)||!MAPS[stageTest.map])stageTest=null;}catch{stageTest=null;}}}
 const languageStorage=(()=>{try{return localStorage;}catch{return null;}})();
 const applyLanguage=bindLanguageUI(document,languageStorage);applyLanguage();
 if(!(typeof __PAGES__==='undefined')){for(const el of document.querySelectorAll('[data-server-only]'))el.hidden=true;document.querySelector('input[value=online]').disabled=true;}
@@ -29,7 +32,7 @@ function library(){try{return readLibrary(localStorage).sort((a,b)=>b.updatedAt.
 function selectedSave(){const entries=library();return entries.find(e=>e.id===$('saveList').value)||entries[0];}
 function savedWorld(){const entry=selectedSave();return entry?decodeSave(entry.data):null;}
 function save(){
- if(mode!=='solo'||!world||!activeSlot)return false;
+ if(stageTest||mode!=='solo'||!world||!activeSlot)return false;
  try{putSave(localStorage,activeSlot,activeName,world,id);setText($('saveStatus'),'Salvo · '+activeName);return true;}
  catch{setText($('saveStatus'),'Falha no armazenamento. Exporte seu save.');return false;}
 }
@@ -124,7 +127,9 @@ async function loadSocket(){
   script.onload=resolve;script.onerror=()=>{script.remove();socketScript=null;reject(new Error('Não foi possível carregar o modo online. O modo solo continua disponível.'));};document.head.append(script);
  });await socketScript;
 }
+function startStageTest(){applySettings(stageTest.settings);world=createStageTest(stageTest.map,stageTest.character);id='solo';mode='solo';activeSlot='';victorySeen=false;closeDialogs();showGame();}
 async function start(continueSave=false){
+ if(stageTest){startStageTest();return;}
  if(joining)return;joining=true;$('start').disabled=true;$('continue').disabled=true;setText($('menuError'),'');
  try{
   const chosen=(typeof __PAGES__==='undefined')?document.querySelector('input[name=mode]:checked').value:'solo';
@@ -280,9 +285,9 @@ function updateHud(){
  if(!world?.players[id])return;const p=world.players[id],m=MAPS[p.map];
  setText($('mapName'),m.name);setText($('healthText'),`Brasa · ${p.hp} / 100`);$('healthFill').style.width=p.hp+'%';setText($('objective'),objective(world));
  setText($('network'),mode==='solo'?'Solo':onlineError?'Desconectado':`Sala ${$('room').value.toUpperCase()} · ${Object.keys(world.players).length}/4`);
- $('saveStatus').hidden=mode==='online';setText($('dashStatus'),p.dashCd>0?p.dashCd.toFixed(1)+'s':'pronta');
+ $('saveStatus').hidden=mode==='online';if(stageTest)$('saveStatus').textContent='Teste isolado · saves desativados';setText($('dashStatus'),p.dashCd>0?p.dashCd.toFixed(1)+'s':'pronta');
  const message=onlineError||roomSaveError||(p.messageTime>0?p.message:'');$('toast').hidden=!message||!$('menu').hidden;setText($('toast'),message);
- let prompt=inLava(p.map,p.x,p.y)?'Lava! Volte para as plataformas de pedra.':'';const nearPortal=portalsOf(p.map).find(a=>Math.hypot(p.x-a.x,p.y-a.y)<a.r+RADIUS);if(nearPortal)prompt='E · '+nearPortal.label;
+ let prompt=inLava(p.map,p.x,p.y)?'Lava! Volte para as plataformas de pedra.':'';const nearPortal=portalsOf(p.map).find(a=>Math.hypot(p.x-a.x,p.y-a.y)<a.r+RADIUS);if(nearPortal)prompt=stageTest?'Teste isolado · portais desativados':'E · '+nearPortal.label;
  else if(Math.hypot(p.x-m.camp.x,p.y-m.camp.y)<95)prompt=world.campfires?.[p.map]?'E · Descansar na fogueira':'E · Acender fogueira';
  if(p.map===2){const rune=RUNES.find(r=>Math.hypot(p.x-r.x,p.y-r.y)<85);if(rune)prompt='E · Ativar '+rune.label;if(Math.hypot(p.x-INSCRIPTION.x,p.y-INSCRIPTION.y)<85)prompt='E · Ler inscrição';}
  setText($('combatStatus'),`Energia ${Math.floor(p.energy??100)} · Q ${p.specialCd>0?p.specialCd.toFixed(1)+'s':'pronto'} · F ${p.rangedCd>0?p.rangedCd.toFixed(1)+'s':'pronto'}`);
@@ -306,7 +311,7 @@ function frame(now){
  requestAnimationFrame(frame);
 }
 function syncSettings(settings){if(settings.revision===getSettings().revision)return;applySettings(settings);if(world&&mode==='solo'){refreshWorldSettings(world);for(const actor of [...Object.values(world.players),...world.enemies])Object.assign(actor,safePoint(actor.map,actor));}}
-async function fetchSettings(){if(!(typeof __PAGES__==='undefined'))return;const r=await fetch('/api/settings',{cache:'no-store'});if(!r.ok)throw new Error('Configuração indisponível');syncSettings(await r.json());}
+async function fetchSettings(){if(stageTest||!(typeof __PAGES__==='undefined'))return;const r=await fetch('/api/settings',{cache:'no-store'});if(!r.ok)throw new Error('Configuração indisponível');syncSettings(await r.json());}
 $('adminLink').hidden=!(typeof __PAGES__==='undefined')||!['localhost','127.0.0.1','[::1]'].includes(location.hostname);
 if((typeof __PAGES__==='undefined'))setInterval(()=>fetchSettings().catch(console.error),5000);
 try{
@@ -316,4 +321,5 @@ try{
   const img=assets[preview.dataset.preview],c=preview.getContext('2d'),fw=img.width/9,fh=img.height/4;c.imageSmoothingEnabled=false;c.drawImage(img,0,fh*2,fw,fh,0,0,80,80);
  }
  $('start').disabled=false;setText($('start'),'Iniciar nova jornada →');refreshSaveList();refreshMode();requestAnimationFrame(frame);
+ if(stageTest){const bar=document.createElement('div');bar.id='stageTestBar';bar.style.cssText='position:fixed;right:16px;top:100px;z-index:50;padding:10px;background:#17251f;border:1px solid #d9ba7b';const title=document.createElement('span');title.textContent='TESTE · '+MAPS[stageTest.map].name+' · Sem saves ';const restart=document.createElement('button');restart.textContent='Reiniciar fase';restart.onclick=startStageTest;const back=document.createElement('a');back.href='/admin.html';back.textContent=' Voltar ao painel';bar.append(title,restart,back);document.body.append(bar);for(const name of ['saveButton','menuSaves','continue'])$(name).hidden=true;startStageTest();}
 }catch(error){setText($('menuError'),'Um recurso do jogo não carregou. Recarregue a página para tentar novamente.');console.error(error);}
